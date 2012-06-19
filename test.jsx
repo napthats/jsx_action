@@ -37,7 +37,15 @@ final class Game {
 
         this.pc = new Pc(Config.defaultX, Config.defaultY);
 
-        this.enemies = [new WalkingEnemy(80, 120, 1) as Enemy, new WalkingEnemy(80, 150, 1) as Enemy];
+        var delta_func = function(tick_count : number) : Map.<number> {
+            var dx = Math.sin(tick_count / Config.fps * 3.14);
+            var dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
+            return {"dx": dx, "dy": dy};
+        };
+        this.enemies = [
+            new WalkingEnemy(80, 120, 1) as Enemy,
+            new WalkingEnemy(80, 150, 1) as Enemy,
+            new FlyingEnemy(70, 40, delta_func) as Enemy];
 
         var body = dom.window.document.body;
         body.addEventListener(

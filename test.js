@@ -80,6 +80,7 @@ Game.prototype = new Object;
  */
 function Game$LHTMLCanvasElement$(canvas) {
 	var $this = this;
+	var delta_func;
 	/** @type {HTMLElement} */
 	var body;
 	this.pc = null;
@@ -94,7 +95,16 @@ function Game$LHTMLCanvasElement$(canvas) {
 	}
 	this.ctx.font = Config.font;
 	this.pc = new Pc$NN(Config.defaultX, Config.defaultY);
-	this.enemies = [ new WalkingEnemy$NNN(80, 120, 1), new WalkingEnemy$NNN(80, 150, 1) ];
+	delta_func = (function (tick_count) {
+		/** @type {!number} */
+		var dx;
+		/** @type {!number} */
+		var dy;
+		dx = Math.sin(tick_count / Config.fps * 3.14);
+		dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
+		return { "dx": dx, "dy": dy };
+	});
+	this.enemies = [ new WalkingEnemy$NNN(80, 120, 1), new WalkingEnemy$NNN(80, 150, 1), new FlyingEnemy$NNF$NHN$(70, 40, delta_func) ];
 	body = dom.window.document.body;
 	body.addEventListener("keydown", (function (e) {
 		/** @type {KeyboardEvent} */
@@ -184,7 +194,7 @@ Game.prototype.tick$ = function () {
 		if (this.pc.hit$LObj$((function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[test.jsx:96] detected misuse of 'undefined' as type 'Enemy'");
+				throw new Error("[test.jsx:104] detected misuse of 'undefined' as type 'Enemy'");
 			}
 			return v;
 		}(this.enemies[i])))) {
@@ -230,13 +240,13 @@ _Main.main$AS = function (args) {
 	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[test.jsx:109] detected misuse of 'undefined' as type 'string'");
+			throw new Error("[test.jsx:117] detected misuse of 'undefined' as type 'string'");
 		}
 		return v;
 	}(args[0]))));
 	if (! (canvas != null)) {
 		debugger;
-		throw new Error("[test.jsx:110] assertion failure");
+		throw new Error("[test.jsx:118] assertion failure");
 	}
 	game = new Game$LHTMLCanvasElement$(canvas);
 	game.tick$();
@@ -445,6 +455,79 @@ function Enemy$() {
 };
 
 Enemy$.prototype = new Enemy;
+
+/**
+ * class FlyingEnemy extends Object
+ * @constructor
+ */
+function FlyingEnemy() {
+}
+
+FlyingEnemy.prototype = new Object;
+$__jsx_merge_interface(FlyingEnemy, Obj);
+$__jsx_merge_interface(FlyingEnemy, Enemy);
+
+/**
+ * @constructor
+ * @param {!number} _x
+ * @param {!number} _y
+ */
+function FlyingEnemy$NNF$NHN$(_x, _y, _get_delta) {
+	Obj$.call(this);
+	Enemy$.call(this);
+	this.x = _x;
+	this.y = _y;
+	this.character = "F";
+	this.get_delta = _get_delta;
+	this.tick_count = 0;
+};
+
+FlyingEnemy$NNF$NHN$.prototype = new FlyingEnemy;
+
+/**
+ */
+FlyingEnemy.prototype.tick$ = function () {
+	/** @type {Object.<string, undefined|!number>} */
+	var delta;
+	delta = this.get_delta(this.tick_count);
+	if (! (delta.dx !== undefined)) {
+		debugger;
+		throw new Error("[obj.jsx:54] assertion failure");
+	}
+	if (! (delta.dy !== undefined)) {
+		debugger;
+		throw new Error("[obj.jsx:55] assertion failure");
+	}
+	if (! this.hitGround$NN((function (v) {
+		if (! (typeof v !== "undefined")) {
+			debugger;
+			throw new Error("[obj.jsx:57] detected misuse of 'undefined' as type 'number'");
+		}
+		return v;
+	}(delta.dx)), (function (v) {
+		if (! (typeof v !== "undefined")) {
+			debugger;
+			throw new Error("[obj.jsx:57] detected misuse of 'undefined' as type 'number'");
+		}
+		return v;
+	}(delta.dy)))) {
+		this.x += (function (v) {
+			if (! (typeof v !== "undefined")) {
+				debugger;
+				throw new Error("[obj.jsx:58] detected misuse of 'undefined' as type 'number'");
+			}
+			return v;
+		}(delta.dx));
+		this.y += (function (v) {
+			if (! (typeof v !== "undefined")) {
+				debugger;
+				throw new Error("[obj.jsx:59] detected misuse of 'undefined' as type 'number'");
+			}
+			return v;
+		}(delta.dy));
+	}
+	++ this.tick_count;
+};
 
 /**
  * class WalkingObj extends Object
@@ -658,6 +741,8 @@ var $__jsx_classMap = {
 		Obj$: Obj$,
 		Enemy: Enemy,
 		Enemy$: Enemy$,
+		FlyingEnemy: FlyingEnemy,
+		FlyingEnemy$NNF$NHN$: FlyingEnemy$NNF$NHN$,
 		WalkingObj: WalkingObj,
 		WalkingObj$NNS: WalkingObj$NNS,
 		WalkingEnemy: WalkingEnemy,

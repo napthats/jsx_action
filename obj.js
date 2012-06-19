@@ -111,6 +111,79 @@ function Enemy$() {
 Enemy$.prototype = new Enemy;
 
 /**
+ * class FlyingEnemy extends Object
+ * @constructor
+ */
+function FlyingEnemy() {
+}
+
+FlyingEnemy.prototype = new Object;
+$__jsx_merge_interface(FlyingEnemy, Obj);
+$__jsx_merge_interface(FlyingEnemy, Enemy);
+
+/**
+ * @constructor
+ * @param {!number} _x
+ * @param {!number} _y
+ */
+function FlyingEnemy$NNF$NHN$(_x, _y, _get_delta) {
+	Obj$.call(this);
+	Enemy$.call(this);
+	this.x = _x;
+	this.y = _y;
+	this.character = "F";
+	this.get_delta = _get_delta;
+	this.tick_count = 0;
+};
+
+FlyingEnemy$NNF$NHN$.prototype = new FlyingEnemy;
+
+/**
+ */
+FlyingEnemy.prototype.tick$ = function () {
+	/** @type {Object.<string, undefined|!number>} */
+	var delta;
+	delta = this.get_delta(this.tick_count);
+	if (! (delta.dx !== undefined)) {
+		debugger;
+		throw new Error("[obj.jsx:54] assertion failure");
+	}
+	if (! (delta.dy !== undefined)) {
+		debugger;
+		throw new Error("[obj.jsx:55] assertion failure");
+	}
+	if (! this.hitGround$NN((function (v) {
+		if (! (typeof v !== "undefined")) {
+			debugger;
+			throw new Error("[obj.jsx:57] detected misuse of 'undefined' as type 'number'");
+		}
+		return v;
+	}(delta.dx)), (function (v) {
+		if (! (typeof v !== "undefined")) {
+			debugger;
+			throw new Error("[obj.jsx:57] detected misuse of 'undefined' as type 'number'");
+		}
+		return v;
+	}(delta.dy)))) {
+		this.x += (function (v) {
+			if (! (typeof v !== "undefined")) {
+				debugger;
+				throw new Error("[obj.jsx:58] detected misuse of 'undefined' as type 'number'");
+			}
+			return v;
+		}(delta.dx));
+		this.y += (function (v) {
+			if (! (typeof v !== "undefined")) {
+				debugger;
+				throw new Error("[obj.jsx:59] detected misuse of 'undefined' as type 'number'");
+			}
+			return v;
+		}(delta.dy));
+	}
+	++ this.tick_count;
+};
+
+/**
  * class WalkingObj extends Object
  * @constructor
  */
@@ -434,6 +507,8 @@ var $__jsx_classMap = {
 		Obj$: Obj$,
 		Enemy: Enemy,
 		Enemy$: Enemy$,
+		FlyingEnemy: FlyingEnemy,
+		FlyingEnemy$NNF$NHN$: FlyingEnemy$NNF$NHN$,
 		WalkingObj: WalkingObj,
 		WalkingObj$NNS: WalkingObj$NNS,
 		WalkingEnemy: WalkingEnemy,

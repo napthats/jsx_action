@@ -32,6 +32,37 @@ mixin Obj {
 
 mixin Enemy implements Obj {}
 
+class FlyingEnemy implements Obj, Enemy {
+    var x : number;
+    var y : number;
+    var character : string;
+    var get_delta : function(:number) : Map.<number>;
+    var tick_count : number;
+
+    function constructor(
+        _x : number, _y : number, _get_delta : function(:number) : Map.<number>
+    ) {
+        this.x = _x;
+        this.y = _y;
+        this.character = "F";
+        this.get_delta = _get_delta;
+        this.tick_count = 0;
+    }
+
+    override function tick() : void {
+        var delta = this.get_delta(this.tick_count);
+        assert(delta["dx"] != undefined);
+        assert(delta["dy"] != undefined);
+
+        if (!this.hitGround(delta["dx"], delta["dy"])) {
+            this.x += delta["dx"];
+            this.y += delta["dy"];
+        }
+        
+        ++this.tick_count;
+    }
+}
+
 abstract class WalkingObj implements Obj {
     var x : number;
     var y : number;
