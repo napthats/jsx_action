@@ -23,12 +23,15 @@ final class Key {
 final class Game {
     var pc : Pc;
     var enemies : Array.<Enemy>;
+    var items : Array.<Item>;
     var ctx : CanvasRenderingContext2D;
     var isEnd : boolean;
+    var isStarted : boolean;
     var stage_number : number;
 
     function constructor(canvas : HTMLCanvasElement) {
         this.isEnd = false;
+        this.isStarted = false;
         this.stage_number = 0;
 
         canvas.width = Config.canvasWidth;
@@ -40,6 +43,8 @@ final class Game {
         this.pc = new Pc(Config.defaultX, Config.defaultY);
 
         this.enemies = Stage.getEnemies();
+
+        this.items = Stage.getItems();
 
         var body = dom.window.document.body;
         body.addEventListener(
@@ -79,6 +84,14 @@ final class Game {
 
         dom.window.setTimeout(function() : void {this.tick();}, (1000 / Config.fps));
 
+        if (!this.isStarted) {
+            this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
+            this.ctx.fillText(Config.startMessage, 0, Config.messageY);
+            if (Key.z) {Stage.setDifficulty(0); this.isStarted = true;}
+            if (Key.x) {Stage.setDifficulty(1); this.isStarted = true;}
+            return;
+        }
+
         this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
         Stage.draw(this.ctx);
       
@@ -103,26 +116,38 @@ final class Game {
             else if (out.direction instanceof Up && Stage.stage_number == 0) {
                 Stage.changeStage(1);
                 this.enemies = Stage.getEnemies();
+                this.items = Stage.getItems();
                 this.pc.y = Config.canvasHeight - Config.objHeight;
             }
             else if (out.direction instanceof Down && Stage.stage_number == 1) {
                 Stage.changeStage(0);
                 this.enemies = Stage.getEnemies();
+                this.items = Stage.getItems();
                 this.pc.y = 0 + Config.objHeight;
             }            
             else if (out.direction instanceof Left && Stage.stage_number == 0) {
                 Stage.changeStage(2);
                 this.enemies = Stage.getEnemies();
+                this.items = Stage.getItems();
                 this.pc.x = Config.canvasWidth - Config.objWidth;
             }
             else if (out.direction instanceof Right && Stage.stage_number == 2) {
                 Stage.changeStage(0);
                 this.enemies = Stage.getEnemies();
+                this.items = Stage.getItems();
                 this.pc.x = 0 + Config.objWidth/2;
             }            
             else assert(false);
         }
         else assert(false);
+
+        for (var i = 0; i < this.items.length; ++i) {
+            this.items[i].draw(this.ctx);
+            if (this.pc.hit(this.items[i])) {
+                this.pc.enableShot();
+                this.items.pop();
+            }
+        }
 
         var deadCheck = [] : Array.<number>;
         for (var i = 0; i < this.enemies.length; ++i) {

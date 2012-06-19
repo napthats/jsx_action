@@ -19,6 +19,13 @@ class Inner implements Region {}
 
 final class Stage {
     static var stage_number = 0;
+    static var difficulty = 1;
+
+    static const items = [
+        [] : Array.<Item>,
+        [] : Array.<Item>,
+        [new Item(124, 216)]
+    ];
 
     static const enemies = [
 //
@@ -48,7 +55,103 @@ final class Stage {
         ]];
 
     static const map = [
+        [[
+        "============       =",
+        "=                  =",
+        "                   =",
+        "             ==    =",
+        "                   =",
+        "=   ====           =",
+        "=   ====           =",
+        "=              =   =",
+        "=              =   =",
+        "=              =   =",
+        "=        =======   =",
+        "====               =",
+        "=                  =",
+        "=   ==             =",
+        "=                  =",
+        "=                  =",
+        "=        ====      =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "==============   ===",
+        "=       ======     =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=   ================",
+        "=                  =",
+        "=                  =",
+        "===================="
+        ],
         [
+        "===    =============",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=      =           =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=           ====   =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "======             =",
+        "=                  =",
+        "=                  =",
+        "=        ====      =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=============    ===",
+        "=                  =",
+        "=                  =",
+        "=   ====     =     =",
+        "=                  =",
+        "=        ===       =",
+        "=                  =",
+        "=                  =",
+        "============       ="
+        ],
+        [
+        "====================",
+        "=                  =",
+        "=                   ",
+        "=                   ",
+        "=                   ",
+        "=             =   ==",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "=        =         =",
+        "=  =               =",
+        "=                  =",
+        "=     ==============",
+        "=                  =",
+        "=                  =",
+        "=  == = = = = = =  =",
+        "=     =   =   =    =",
+        "=                  =",
+        "=                  =",
+        "=   ================",
+        "=    =             =",
+        "=         =        =",
+        "==                 =",
+        "=           =      =",
+        "=                  =",
+        "=      =           =",
+        "=              ==  =",
+        "=              ==  =",
+        "===================="
+        ]],
+        [[
         "============       =",
         "=      =           =",
         "       =           =",
@@ -71,10 +174,10 @@ final class Stage {
         "=                  =",
         "=                  =",
         "==============   ===",
-        "=         ====     =",
+        "=       ======     =",
+        "=       ======     =",
         "=                  =",
-        "=                  =",
-        "=                  =",
+        "=               ====",
         "=   ================",
         "=                  =",
         "=                  =",
@@ -136,17 +239,28 @@ final class Stage {
         "=   ================",
         "=    =             =",
         "=         =        =",
-        "=                  =",
-        "=                  =",
+        "==                 =",
+        "=           =      =",
         "=                  =",
         "=      =           =",
-        "=                  =",
-        "=                  =",
+        "=              ==  =",
+        "=              ==  =",
         "===================="
-        ]];
+        ]]];
+
+
 
     static function getEnemies() : Array.<Enemy> {
         return Stage.enemies[Stage.stage_number];
+    }
+
+    static function getItems() : Array.<Item> {
+        return Stage.items[Stage.stage_number];
+    }
+
+    static function setDifficulty(d : number) : void {
+        assert(d == 0 || d == 1);
+        Stage.difficulty = d;
     }
 
     static function changeStage(_stage_number : number) : void {
@@ -156,12 +270,12 @@ final class Stage {
 
     static function draw(context : CanvasRenderingContext2D) : void {
         var y_ord = 1;
-        for (var key in Stage.map[Stage.stage_number]) {
-            var str = Stage.map[Stage.stage_number][key];
+        for (var key in Stage.map[Stage.difficulty][Stage.stage_number]) {
+            var str = Stage.map[Stage.difficulty][Stage.stage_number][key];
             var x_ord = 0;
             for (var i = 0; i < str.length; ++i) {
                 context.fillText(
-                    Stage.map[Stage.stage_number][key].charAt(i),
+                    Stage.map[Stage.difficulty][Stage.stage_number][key].charAt(i),
                     Config.objWidth * x_ord,
                     Config.objHeight * y_ord
                 );
@@ -176,10 +290,10 @@ final class Stage {
         var ord_x_r = Math.floor(x / Config.objWidth) + 1;
         var ord_y_d = Math.floor(y / Config.objHeight);
         var ord_y_t = Math.floor(y / Config.objHeight) - 1;
-        if (ord_x_l + 0.5 < 0) return new Outer(new Left);
-        else if (ord_x_r - 0.5 >= 20) return new Outer(new Right);
-        else if (ord_y_d - 0.5 >= 30) return new Outer(new Down);
-        else if (ord_y_t + 0.5 < 0) return new Outer(new Up);
+        if (ord_x_l < 0) return new Outer(new Left);
+        else if (ord_x_r >= 20) return new Outer(new Right);
+        else if (ord_y_d >= 30) return new Outer(new Down);
+        else if (ord_y_t < 0) return new Outer(new Up);
         else return new Inner();
     }
 
@@ -189,10 +303,10 @@ final class Stage {
         var ord_y_d = Math.floor(y / Config.objHeight);
         var ord_y_t = Math.floor(y / Config.objHeight) - 1;
         if (ord_x_l < 0 || ord_x_r >= 20 || ord_y_d >= 30 || ord_y_t < 0) return false;
-        if (Stage.map[Stage.stage_number][ord_y_d].charAt(ord_x_l) == ' ' &&
-            Stage.map[Stage.stage_number][ord_y_d].charAt(ord_x_r) == ' ' &&
-            Stage.map[Stage.stage_number][ord_y_t].charAt(ord_x_l) == ' ' &&
-            Stage.map[Stage.stage_number][ord_y_t].charAt(ord_x_r) == ' ')
+        if (Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_l) == ' ' &&
+            Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_r) == ' ' &&
+            Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_l) == ' ' &&
+            Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_r) == ' ')
                 return false;
         else return true;
     }

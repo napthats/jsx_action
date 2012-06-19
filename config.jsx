@@ -11,4 +11,5 @@ final class Config {
     static const messageY = 120;
     static const goalMessage = "Congratulation!";
     static const deadMessage = "Game Over";
+    static const startMessage = "Normal: z, Hard: x";
 }

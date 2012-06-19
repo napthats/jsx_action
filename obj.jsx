@@ -35,6 +35,19 @@ mixin Obj {
     abstract function tick() : void;
 }
 
+class Item implements Obj {
+    var x : number;
+    var y : number;
+    var character : string;
+
+    function constructor(_x : number, _y : number) {
+        this.x = _x;
+        this.y = _y;
+        this.character = "%";
+    }
+
+    override function tick() : void {}
+}
 
 mixin Enemy implements Obj {
     abstract var hp : number;
@@ -156,11 +169,13 @@ final class Pc extends WalkingObj {
     static var shot_dx = 3;
     var dir : number;
     var shot_delay : number;
+    var can_shot : boolean;
 
     function constructor(_x : number, _y : number) {
         super(_x, _y, "@");
         this.dir = 1;
         this.shot_delay = 0;
+        this.can_shot = false;
     }
 
     function move(pow : number) : void {
@@ -173,8 +188,12 @@ final class Pc extends WalkingObj {
         if (this.onGround) this.dy = -pow;
     }
 
+    function enableShot() : void {
+        this.can_shot = true;
+    }
+
     function shot() : Bullet {
-        if (this.shot_delay) return null;
+        if (!this.can_shot || this.shot_delay) return null;
         this.shot_delay = 30;
         return new Bullet(this.x + this.dir * (Config.objWidth + Pc.shot_dx), this.y,
                           this.dir * Pc.shot_dx);

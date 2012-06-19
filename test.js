@@ -84,18 +84,21 @@ function Game$LHTMLCanvasElement$(canvas) {
 	var body;
 	this.pc = null;
 	this.enemies = null;
+	this.items = null;
 	this.isEnd = false;
+	this.isStarted = false;
 	this.stage_number = 0;
 	canvas.width = (Config.canvasWidth | 0);
 	canvas.height = (Config.canvasHeight | 0);
 	this.ctx = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
 	if (! (this.ctx != null)) {
 		debugger;
-		throw new Error("[test.jsx:37] assertion failure");
+		throw new Error("[test.jsx:40] assertion failure");
 	}
 	this.ctx.font = Config.font;
 	this.pc = new Pc$NN(Config.defaultX, Config.defaultY);
 	this.enemies = Stage$getEnemies$();
+	this.items = Stage$getItems$();
 	body = dom.window.document.body;
 	body.addEventListener("keydown", (function (e) {
 		/** @type {KeyboardEvent} */
@@ -159,10 +162,10 @@ Game.prototype.tick$ = function () {
 	var inout;
 	/** @type {Outer} */
 	var out;
-	/** @type {Array.<undefined|!number>} */
-	var deadCheck;
 	/** @type {!number} */
 	var i;
+	/** @type {Array.<undefined|!number>} */
+	var deadCheck;
 	/** @type {Enemy} */
 	var enemy;
 	/** @type {!number} */
@@ -175,6 +178,19 @@ Game.prototype.tick$ = function () {
 	dom.window.setTimeout((function () {
 		$this.tick$();
 	}), 1000 / Config.fps);
+	if (! this.isStarted) {
+		this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
+		this.ctx.fillText(Config.startMessage, 0, Config.messageY);
+		if (Key.z) {
+			Stage$setDifficulty$N(0);
+			this.isStarted = true;
+		}
+		if (Key.x) {
+			Stage$setDifficulty$N(1);
+			this.isStarted = true;
+		}
+		return;
+	}
 	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
 	Stage$draw$LCanvasRenderingContext2D$(this.ctx);
 	if (Key.right) {
@@ -206,26 +222,30 @@ Game.prototype.tick$ = function () {
 				if (out.direction instanceof Up && Stage.stage_number === 0) {
 					Stage$changeStage$N(1);
 					this.enemies = Stage$getEnemies$();
+					this.items = Stage$getItems$();
 					this.pc.y = Config.canvasHeight - Config.objHeight;
 				} else {
 					if (out.direction instanceof Down && Stage.stage_number === 1) {
 						Stage$changeStage$N(0);
 						this.enemies = Stage$getEnemies$();
+						this.items = Stage$getItems$();
 						this.pc.y = 0 + Config.objHeight;
 					} else {
 						if (out.direction instanceof Left && Stage.stage_number === 0) {
 							Stage$changeStage$N(2);
 							this.enemies = Stage$getEnemies$();
+							this.items = Stage$getItems$();
 							this.pc.x = Config.canvasWidth - Config.objWidth;
 						} else {
 							if (out.direction instanceof Right && Stage.stage_number === 2) {
 								Stage$changeStage$N(0);
 								this.enemies = Stage$getEnemies$();
+								this.items = Stage$getItems$();
 								this.pc.x = 0 + Config.objWidth / 2;
 							} else {
 								if (! (false)) {
 									debugger;
-									throw new Error("[test.jsx:123] assertion failure");
+									throw new Error("[test.jsx:140] assertion failure");
 								}
 							}
 						}
@@ -235,8 +255,21 @@ Game.prototype.tick$ = function () {
 		} else {
 			if (! (false)) {
 				debugger;
-				throw new Error("[test.jsx:125] assertion failure");
+				throw new Error("[test.jsx:142] assertion failure");
 			}
+		}
+	}
+	for (i = 0; i < this.items.length; ++ i) {
+		this.items[i].draw$LCanvasRenderingContext2D$(this.ctx);
+		if (this.pc.hit$LObj$((function (v) {
+			if (! (typeof v !== "undefined")) {
+				debugger;
+				throw new Error("[test.jsx:146] detected misuse of 'undefined' as type 'Item'");
+			}
+			return v;
+		}(this.items[i])))) {
+			this.pc.enableShot$();
+			this.items.pop();
 		}
 	}
 	deadCheck = [  ];
@@ -244,7 +277,7 @@ Game.prototype.tick$ = function () {
 		enemy = (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[test.jsx:129] detected misuse of 'undefined' as type 'Enemy'");
+				throw new Error("[test.jsx:154] detected misuse of 'undefined' as type 'Enemy'");
 			}
 			return v;
 		}(this.enemies[i]));
@@ -255,7 +288,7 @@ Game.prototype.tick$ = function () {
 				if (i !== j && enemy.hit$LObj$((function (v) {
 					if (! (typeof v !== "undefined")) {
 						debugger;
-						throw new Error("[test.jsx:136] detected misuse of 'undefined' as type 'Enemy'");
+						throw new Error("[test.jsx:161] detected misuse of 'undefined' as type 'Enemy'");
 					}
 					return v;
 				}(this.enemies[j])))) {
@@ -279,7 +312,7 @@ Game.prototype.tick$ = function () {
 				l.push((function (v) {
 					if (! (typeof v !== "undefined")) {
 						debugger;
-						throw new Error("[test.jsx:150] detected misuse of 'undefined' as type 'Enemy'");
+						throw new Error("[test.jsx:175] detected misuse of 'undefined' as type 'Enemy'");
 					}
 					return v;
 				}(this.enemies[j])));
@@ -325,13 +358,13 @@ _Main.main$AS = function (args) {
 	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[test.jsx:165] detected misuse of 'undefined' as type 'string'");
+			throw new Error("[test.jsx:190] detected misuse of 'undefined' as type 'string'");
 		}
 		return v;
 	}(args[0]))));
 	if (! (canvas != null)) {
 		debugger;
-		throw new Error("[test.jsx:166] assertion failure");
+		throw new Error("[test.jsx:191] assertion failure");
 	}
 	game = new Game$LHTMLCanvasElement$(canvas);
 	game.tick$();
@@ -582,12 +615,34 @@ Stage.getEnemies$ = function () {
 var Stage$getEnemies$ = Stage.getEnemies$;
 
 /**
+ * @return {Array.<undefined|Item>}
+ */
+Stage.getItems$ = function () {
+	return Stage.items[Stage.stage_number];
+};
+
+var Stage$getItems$ = Stage.getItems$;
+
+/**
+ * @param {!number} d
+ */
+Stage.setDifficulty$N = function (d) {
+	if (! (d === 0 || d === 1)) {
+		debugger;
+		throw new Error("[stage.jsx:262] assertion failure");
+	}
+	Stage.difficulty = d;
+};
+
+var Stage$setDifficulty$N = Stage.setDifficulty$N;
+
+/**
  * @param {!number} _stage_number
  */
 Stage.changeStage$N = function (_stage_number) {
 	if (! (_stage_number === 0 || _stage_number === 1 || _stage_number === 2)) {
 		debugger;
-		throw new Error("[stage.jsx:153] assertion failure");
+		throw new Error("[stage.jsx:267] assertion failure");
 	}
 	Stage.stage_number = _stage_number;
 };
@@ -609,11 +664,11 @@ Stage.draw$LCanvasRenderingContext2D$ = function (context) {
 	/** @type {!number} */
 	var i;
 	y_ord = 1;
-	for (key in Stage.map[Stage.stage_number]) {
-		str = Stage.map[Stage.stage_number][key];
+	for (key in Stage.map[Stage.difficulty][Stage.stage_number]) {
+		str = Stage.map[Stage.difficulty][Stage.stage_number][key];
 		x_ord = 0;
 		for (i = 0; i < str.length; ++ i) {
-			context.fillText(Stage.map[Stage.stage_number][key].charAt(i), Config.objWidth * x_ord, Config.objHeight * y_ord);
+			context.fillText(Stage.map[Stage.difficulty][Stage.stage_number][key].charAt(i), Config.objWidth * x_ord, Config.objHeight * y_ord);
 			x_ord += 1;
 		}
 		y_ord += 1;
@@ -640,16 +695,16 @@ Stage.checkInner$NN = function (x, y) {
 	ord_x_r = Math.floor(x / Config.objWidth) + 1;
 	ord_y_d = Math.floor(y / Config.objHeight);
 	ord_y_t = Math.floor(y / Config.objHeight) - 1;
-	if (ord_x_l + 0.5 < 0) {
+	if (ord_x_l < 0) {
 		return new Outer$LDirection$(new Left$());
 	} else {
-		if (ord_x_r - 0.5 >= 20) {
+		if (ord_x_r >= 20) {
 			return new Outer$LDirection$(new Right$());
 		} else {
-			if (ord_y_d - 0.5 >= 30) {
+			if (ord_y_d >= 30) {
 				return new Outer$LDirection$(new Down$());
 			} else {
-				if (ord_y_t + 0.5 < 0) {
+				if (ord_y_t < 0) {
 					return new Outer$LDirection$(new Up$());
 				} else {
 					return new Inner$();
@@ -682,7 +737,7 @@ Stage.isGround$NN = function (x, y) {
 	if (ord_x_l < 0 || ord_x_r >= 20 || ord_y_d >= 30 || ord_y_t < 0) {
 		return false;
 	}
-	if (Stage.map[Stage.stage_number][ord_y_d].charAt(ord_x_l) === ' ' && Stage.map[Stage.stage_number][ord_y_d].charAt(ord_x_r) === ' ' && Stage.map[Stage.stage_number][ord_y_t].charAt(ord_x_l) === ' ' && Stage.map[Stage.stage_number][ord_y_t].charAt(ord_x_r) === ' ') {
+	if (Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_l) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_r) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_l) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_r) === ' ') {
 		return false;
 	} else {
 		return true;
@@ -741,6 +796,35 @@ Obj.prototype.isOuter$ = function () {
  */
 Obj.prototype.draw$LCanvasRenderingContext2D$ = function (context) {
 	context.fillText(this.character, this.x, this.y);
+};
+
+/**
+ * class Item extends Object
+ * @constructor
+ */
+function Item() {
+}
+
+Item.prototype = new Object;
+$__jsx_merge_interface(Item, Obj);
+
+/**
+ * @constructor
+ * @param {!number} _x
+ * @param {!number} _y
+ */
+function Item$NN(_x, _y) {
+	Obj$.call(this);
+	this.x = _x;
+	this.y = _y;
+	this.character = "%";
+};
+
+Item$NN.prototype = new Item;
+
+/**
+ */
+Item.prototype.tick$ = function () {
 };
 
 /**
@@ -849,36 +933,36 @@ FlyingEnemy.prototype.tick$ = function () {
 	delta = this.get_delta(this.tick_count);
 	if (! (delta.dx !== undefined)) {
 		debugger;
-		throw new Error("[obj.jsx:93] assertion failure");
+		throw new Error("[obj.jsx:106] assertion failure");
 	}
 	if (! (delta.dy !== undefined)) {
 		debugger;
-		throw new Error("[obj.jsx:94] assertion failure");
+		throw new Error("[obj.jsx:107] assertion failure");
 	}
 	if (! this.hitGround$NN((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[obj.jsx:96] detected misuse of 'undefined' as type 'number'");
+			throw new Error("[obj.jsx:109] detected misuse of 'undefined' as type 'number'");
 		}
 		return v;
 	}(delta.dx)), (function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[obj.jsx:96] detected misuse of 'undefined' as type 'number'");
+			throw new Error("[obj.jsx:109] detected misuse of 'undefined' as type 'number'");
 		}
 		return v;
 	}(delta.dy)))) {
 		this.x += (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[obj.jsx:97] detected misuse of 'undefined' as type 'number'");
+				throw new Error("[obj.jsx:110] detected misuse of 'undefined' as type 'number'");
 			}
 			return v;
 		}(delta.dx));
 		this.y += (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[obj.jsx:98] detected misuse of 'undefined' as type 'number'");
+				throw new Error("[obj.jsx:111] detected misuse of 'undefined' as type 'number'");
 			}
 			return v;
 		}(delta.dy));
@@ -992,6 +1076,7 @@ function Pc$NN(_x, _y) {
 	WalkingObj$NNS.call(this, _x, _y, "@");
 	this.dir = 1;
 	this.shot_delay = 0;
+	this.can_shot = false;
 };
 
 Pc$NN.prototype = new Pc;
@@ -1021,10 +1106,16 @@ Pc.prototype.jump$N = function (pow) {
 };
 
 /**
+ */
+Pc.prototype.enableShot$ = function () {
+	this.can_shot = true;
+};
+
+/**
  * @return {Bullet}
  */
 Pc.prototype.shot$ = function () {
-	if (this.shot_delay) {
+	if (! this.can_shot || this.shot_delay) {
 		return null;
 	}
 	this.shot_delay = 30;
@@ -1092,7 +1183,12 @@ Config.messageX = 40;
 Config.messageY = 120;
 Config.goalMessage = "Congratulation!";
 Config.deadMessage = "Game Over";
+Config.startMessage = "Normal: z, Hard: x";
 Stage.stage_number = 0;
+Stage.difficulty = 1;
+$__jsx_lazy_init(Stage, "items", function () {
+	return [ [  ], [  ], [ new Item$NN(124, 216) ] ];
+});
 $__jsx_lazy_init(Stage, "enemies", function () {
 	return [ [ new WalkingEnemy$NNN(80, 200, 1), new WalkingEnemy$NNN(90, 60, 1) ], [ new WalkingEnemy$NNN(80, 120, 0.5), new WalkingEnemy$NNN(80, 150, 3), new WalkingEnemy$NNN(140, 140, 0), new WalkingEnemy$NNN(10, 40, 1), new WalkingEnemy$NNN(80, 200, 1), new FlyingEnemy$NNF$NHN$(70, 40, (function (tick_count) {
 		/** @type {!number} */
@@ -1110,7 +1206,7 @@ $__jsx_lazy_init(Stage, "enemies", function () {
 	})) ], [ new WalkingEnemy$NNN(72, 40, 0), new WalkingEnemy$NNN(80, 158, 3) ] ];
 });
 $__jsx_lazy_init(Stage, "map", function () {
-	return [ [ "============       =", "=      =           =", "       =           =", "       =     ===   =", "=                  =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "=  =               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         ====     =", "=                  =", "=                  =", "=                  =", "=   ================", "=                  =", "=                  =", "====================" ], [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         =        =", "=         =        =", "=   ====     =     =", "=      =     =     =", "=      =======     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                  =", "=             =    =", "=                  =", "=                  =", "=                  =", "=                  =", "=        =         =", "=  =               =", "=                  =", "=    ===============", "=                  =", "=                  =", "= = = = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "====================" ] ];
+	return [ [ [ "============       =", "=                  =", "                   =", "             ==    =", "                   =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "====               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=       ======     =", "=                  =", "=                  =", "=                  =", "=   ================", "=                  =", "=                  =", "====================" ], [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=           ====   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "=============    ===", "=                  =", "=                  =", "=   ====     =     =", "=                  =", "=        ===       =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                   ", "=             =   ==", "=                  =", "=                  =", "=                  =", "=                  =", "=        =         =", "=  =               =", "=                  =", "=     ==============", "=                  =", "=                  =", "=  == = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "==                 =", "=           =      =", "=                  =", "=      =           =", "=              ==  =", "=              ==  =", "====================" ] ], [ [ "============       =", "=      =           =", "       =           =", "       =     ===   =", "=                  =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "=  =               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=       ======     =", "=       ======     =", "=                  =", "=               ====", "=   ================", "=                  =", "=                  =", "====================" ], [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         =        =", "=         =        =", "=   ====     =     =", "=      =     =     =", "=      =======     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                  =", "=             =    =", "=                  =", "=                  =", "=                  =", "=                  =", "=        =         =", "=  =               =", "=                  =", "=    ===============", "=                  =", "=                  =", "= = = = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "==                 =", "=           =      =", "=                  =", "=      =           =", "=              ==  =", "=              ==  =", "====================" ] ] ];
 });
 Pc.max_dx = 2;
 Pc.shot_dx = 3;
@@ -1156,6 +1252,8 @@ var $__jsx_classMap = {
 	"obj.jsx": {
 		Obj: Obj,
 		Obj$: Obj$,
+		Item: Item,
+		Item$NN: Item$NN,
 		Enemy: Enemy,
 		Enemy$: Enemy$,
 		Bullet: Bullet,
