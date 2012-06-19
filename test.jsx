@@ -80,12 +80,15 @@ final class Game {
         dom.window.setTimeout(function() : void {this.tick();}, (1000 / Config.fps));
 
         this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
-  
         Stage.draw(this.ctx);
       
         if (Key.right) this.pc.move(1);
         if (Key.left) this.pc.move(-1);
         if (Key.up || Key.z) this.pc.jump(4.5);
+        if (Key.x) {
+            var bullet = this.pc.shot();
+            if (bullet) this.enemies.push(bullet);
+        }
 
         this.pc.tick();
 
@@ -121,11 +124,32 @@ final class Game {
         }
         else assert(false);
 
+        var deadCheck = [] : Array.<number>;
         for (var i = 0; i < this.enemies.length; ++i) {
-            this.enemies[i].tick();
-            this.enemies[i].draw(this.ctx);
+            var enemy : Enemy = this.enemies[i];
+            enemy.tick();
+            enemy.draw(this.ctx);
             
-            if (this.pc.hit(this.enemies[i])) {this.gameEnd(Config.deadMessage); return;}
+
+            if (enemy instanceof Bullet) {
+                for (var j = 0; j < this.enemies.length; ++j) {
+                    if (i != j && enemy.hit(this.enemies[j])) {
+                        enemy.damage();
+                        this.enemies[j].damage();
+                    }
+                }
+            }
+            
+            if (this.enemies[i].isDead()) deadCheck.push(i);
+
+            if (this.pc.hit(enemy)) {this.gameEnd(Config.deadMessage); return;}
+        }
+        for (var i = 0; i < deadCheck.length; ++i) {
+            var l = [] : Array.<Enemy>;
+            for (var j = 0; j < this.enemies.length; ++j) {
+                if (deadCheck[i] != j) l.push(this.enemies[j]);
+            }
+            this.enemies = l;
         }
     }
 

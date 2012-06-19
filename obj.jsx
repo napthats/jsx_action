@@ -35,7 +35,39 @@ mixin Obj {
     abstract function tick() : void;
 }
 
-mixin Enemy implements Obj {}
+
+mixin Enemy implements Obj {
+    abstract var hp : number;
+
+    function isDead() : boolean {
+        return this.hp <= 0;
+    }
+
+    function damage() : void {
+        --this.hp;
+    }
+}
+
+class Bullet implements Enemy {
+    var x : number;
+    var y : number;
+    var character : string;
+    var dx : number;
+    var hp : number;
+
+    function constructor(_x : number, _y : number, _dx : number) {
+        this.x = _x;
+        this.y = _y;
+        this.character = ":";
+        this.dx = _dx;
+        this.hp = 1;
+    }
+
+    override function tick() : void {
+        if (this.hitGround(this.dx, 0)) this.hp = 0;
+        else this.x += this.dx;
+    }
+}
 
 class FlyingEnemy implements Obj, Enemy {
     var x : number;
@@ -43,6 +75,7 @@ class FlyingEnemy implements Obj, Enemy {
     var character : string;
     var get_delta : function(:number) : Map.<number>;
     var tick_count : number;
+    var hp : number;
 
     function constructor(
         _x : number, _y : number, _get_delta : function(:number) : Map.<number>
@@ -52,6 +85,7 @@ class FlyingEnemy implements Obj, Enemy {
         this.character = "F";
         this.get_delta = _get_delta;
         this.tick_count = 0;
+        this.hp = 3;
     }
 
     override function tick() : void {
@@ -101,10 +135,12 @@ abstract class WalkingObj implements Obj {
 }
 
 final class WalkingEnemy extends WalkingObj implements Enemy {
+    var hp : number;
 
     function constructor(_x : number, _y : number, _dx : number) {
         super(_x, _y, "E");
         this.dx = _dx;
+        this.hp = 3;
     }
 
     override function tick() : void {
@@ -117,12 +153,19 @@ final class WalkingEnemy extends WalkingObj implements Enemy {
 
 final class Pc extends WalkingObj {
     static var max_dx = 2;
+    static var shot_dx = 3;
+    var dir : number;
+    var shot_delay : number;
 
     function constructor(_x : number, _y : number) {
         super(_x, _y, "@");
+        this.dir = 1;
+        this.shot_delay = 0;
     }
 
     function move(pow : number) : void {
+        if (pow > 0) this.dir = 1;
+        else this.dir = -1;
         if (Math.abs(this.dx + pow/10) <= Pc.max_dx) this.dx += pow/10;
     }
 
@@ -130,7 +173,16 @@ final class Pc extends WalkingObj {
         if (this.onGround) this.dy = -pow;
     }
 
+    function shot() : Bullet {
+        if (this.shot_delay) return null;
+        this.shot_delay = 30;
+        return new Bullet(this.x + this.dir * (Config.objWidth + Pc.shot_dx), this.y,
+                          this.dir * Pc.shot_dx);
+    }
+
     override function tick() : void {
+        if (this.shot_delay) --this.shot_delay;
+
         if (Math.abs(this.dx) >= 0.1) {this.dx -= 0.05 * (Math.abs(this.dx) / this.dx);}
         else {this.dx = 0;}
 

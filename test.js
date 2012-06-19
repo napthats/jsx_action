@@ -153,12 +153,22 @@ Game$LHTMLCanvasElement$.prototype = new Game;
  */
 Game.prototype.tick$ = function () {
 	var $this = this;
+	/** @type {Bullet} */
+	var bullet;
 	/** @type {Region} */
 	var inout;
 	/** @type {Outer} */
 	var out;
+	/** @type {Array.<undefined|!number>} */
+	var deadCheck;
 	/** @type {!number} */
 	var i;
+	/** @type {Enemy} */
+	var enemy;
+	/** @type {!number} */
+	var j;
+	/** @type {Array.<undefined|Enemy>} */
+	var l;
 	if (this.isEnd) {
 		return;
 	}
@@ -175,6 +185,12 @@ Game.prototype.tick$ = function () {
 	}
 	if (Key.up || Key.z) {
 		this.pc.jump$N(4.5);
+	}
+	if (Key.x) {
+		bullet = this.pc.shot$();
+		if (bullet) {
+			this.enemies.push(bullet);
+		}
 	}
 	this.pc.tick$();
 	inout = Stage$checkInner$NN(this.pc.x, this.pc.y);
@@ -209,7 +225,7 @@ Game.prototype.tick$ = function () {
 							} else {
 								if (! (false)) {
 									debugger;
-									throw new Error("[test.jsx:120] assertion failure");
+									throw new Error("[test.jsx:123] assertion failure");
 								}
 							}
 						}
@@ -219,23 +235,57 @@ Game.prototype.tick$ = function () {
 		} else {
 			if (! (false)) {
 				debugger;
-				throw new Error("[test.jsx:122] assertion failure");
+				throw new Error("[test.jsx:125] assertion failure");
 			}
 		}
 	}
+	deadCheck = [  ];
 	for (i = 0; i < this.enemies.length; ++ i) {
-		this.enemies[i].tick$();
-		this.enemies[i].draw$LCanvasRenderingContext2D$(this.ctx);
-		if (this.pc.hit$LObj$((function (v) {
+		enemy = (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[test.jsx:128] detected misuse of 'undefined' as type 'Enemy'");
+				throw new Error("[test.jsx:129] detected misuse of 'undefined' as type 'Enemy'");
 			}
 			return v;
-		}(this.enemies[i])))) {
+		}(this.enemies[i]));
+		enemy.tick$();
+		enemy.draw$LCanvasRenderingContext2D$(this.ctx);
+		if (enemy instanceof Bullet) {
+			for (j = 0; j < this.enemies.length; ++ j) {
+				if (i !== j && enemy.hit$LObj$((function (v) {
+					if (! (typeof v !== "undefined")) {
+						debugger;
+						throw new Error("[test.jsx:136] detected misuse of 'undefined' as type 'Enemy'");
+					}
+					return v;
+				}(this.enemies[j])))) {
+					enemy.damage$();
+					this.enemies[j].damage$();
+				}
+			}
+		}
+		if (this.enemies[i].isDead$()) {
+			deadCheck.push(i);
+		}
+		if (this.pc.hit$LObj$(enemy)) {
 			this.gameEnd$S(Config.deadMessage);
 			return;
 		}
+	}
+	for (i = 0; i < deadCheck.length; ++ i) {
+		l = [  ];
+		for (j = 0; j < this.enemies.length; ++ j) {
+			if (deadCheck[i] !== j) {
+				l.push((function (v) {
+					if (! (typeof v !== "undefined")) {
+						debugger;
+						throw new Error("[test.jsx:150] detected misuse of 'undefined' as type 'Enemy'");
+					}
+					return v;
+				}(this.enemies[j])));
+			}
+		}
+		this.enemies = l;
 	}
 };
 
@@ -275,13 +325,13 @@ _Main.main$AS = function (args) {
 	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[test.jsx:141] detected misuse of 'undefined' as type 'string'");
+			throw new Error("[test.jsx:165] detected misuse of 'undefined' as type 'string'");
 		}
 		return v;
 	}(args[0]))));
 	if (! (canvas != null)) {
 		debugger;
-		throw new Error("[test.jsx:142] assertion failure");
+		throw new Error("[test.jsx:166] assertion failure");
 	}
 	game = new Game$LHTMLCanvasElement$(canvas);
 	game.tick$();
@@ -480,6 +530,7 @@ $__jsx_merge_interface(Outer, Region);
  * @param {Direction} d
  */
 function Outer$LDirection$(d) {
+	var $this = this;
 	Region$.call(this);
 	this.direction = d;
 };
@@ -536,7 +587,7 @@ var Stage$getEnemies$ = Stage.getEnemies$;
 Stage.changeStage$N = function (_stage_number) {
 	if (! (_stage_number === 0 || _stage_number === 1 || _stage_number === 2)) {
 		debugger;
-		throw new Error("[stage.jsx:145] assertion failure");
+		throw new Error("[stage.jsx:153] assertion failure");
 	}
 	Stage.stage_number = _stage_number;
 };
@@ -712,6 +763,56 @@ function Enemy$() {
 Enemy$.prototype = new Enemy;
 
 /**
+ * @return {!boolean}
+ */
+Enemy.prototype.isDead$ = function () {
+	return this.hp <= 0;
+};
+
+/**
+ */
+Enemy.prototype.damage$ = function () {
+	-- this.hp;
+};
+
+/**
+ * class Bullet extends Object
+ * @constructor
+ */
+function Bullet() {
+}
+
+Bullet.prototype = new Object;
+$__jsx_merge_interface(Bullet, Enemy);
+
+/**
+ * @constructor
+ * @param {!number} _x
+ * @param {!number} _y
+ * @param {!number} _dx
+ */
+function Bullet$NNN(_x, _y, _dx) {
+	Enemy$.call(this);
+	this.x = _x;
+	this.y = _y;
+	this.character = ":";
+	this.dx = _dx;
+	this.hp = 1;
+};
+
+Bullet$NNN.prototype = new Bullet;
+
+/**
+ */
+Bullet.prototype.tick$ = function () {
+	if (this.hitGround$NN(this.dx, 0)) {
+		this.hp = 0;
+	} else {
+		this.x += this.dx;
+	}
+};
+
+/**
  * class FlyingEnemy extends Object
  * @constructor
  */
@@ -735,6 +836,7 @@ function FlyingEnemy$NNF$NHN$(_x, _y, _get_delta) {
 	this.character = "F";
 	this.get_delta = _get_delta;
 	this.tick_count = 0;
+	this.hp = 3;
 };
 
 FlyingEnemy$NNF$NHN$.prototype = new FlyingEnemy;
@@ -747,36 +849,36 @@ FlyingEnemy.prototype.tick$ = function () {
 	delta = this.get_delta(this.tick_count);
 	if (! (delta.dx !== undefined)) {
 		debugger;
-		throw new Error("[obj.jsx:59] assertion failure");
+		throw new Error("[obj.jsx:93] assertion failure");
 	}
 	if (! (delta.dy !== undefined)) {
 		debugger;
-		throw new Error("[obj.jsx:60] assertion failure");
+		throw new Error("[obj.jsx:94] assertion failure");
 	}
 	if (! this.hitGround$NN((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[obj.jsx:62] detected misuse of 'undefined' as type 'number'");
+			throw new Error("[obj.jsx:96] detected misuse of 'undefined' as type 'number'");
 		}
 		return v;
 	}(delta.dx)), (function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[obj.jsx:62] detected misuse of 'undefined' as type 'number'");
+			throw new Error("[obj.jsx:96] detected misuse of 'undefined' as type 'number'");
 		}
 		return v;
 	}(delta.dy)))) {
 		this.x += (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[obj.jsx:63] detected misuse of 'undefined' as type 'number'");
+				throw new Error("[obj.jsx:97] detected misuse of 'undefined' as type 'number'");
 			}
 			return v;
 		}(delta.dx));
 		this.y += (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[obj.jsx:64] detected misuse of 'undefined' as type 'number'");
+				throw new Error("[obj.jsx:98] detected misuse of 'undefined' as type 'number'");
 			}
 			return v;
 		}(delta.dy));
@@ -857,6 +959,7 @@ function WalkingEnemy$NNN(_x, _y, _dx) {
 	WalkingObj$NNS.call(this, _x, _y, "E");
 	Enemy$.call(this);
 	this.dx = _dx;
+	this.hp = 3;
 };
 
 WalkingEnemy$NNN.prototype = new WalkingEnemy;
@@ -887,6 +990,8 @@ Pc.prototype = new WalkingObj;
  */
 function Pc$NN(_x, _y) {
 	WalkingObj$NNS.call(this, _x, _y, "@");
+	this.dir = 1;
+	this.shot_delay = 0;
 };
 
 Pc$NN.prototype = new Pc;
@@ -896,6 +1001,11 @@ Pc$NN.prototype = new Pc;
  */
 Pc.prototype.move$N = function (pow) {
 	var $math_abs_t;
+	if (pow > 0) {
+		this.dir = 1;
+	} else {
+		this.dir = - 1;
+	}
 	if ((($math_abs_t = this.dx + pow / 10) >= 0 ? $math_abs_t : -$math_abs_t) <= Pc.max_dx) {
 		this.dx += pow / 10;
 	}
@@ -911,9 +1021,23 @@ Pc.prototype.jump$N = function (pow) {
 };
 
 /**
+ * @return {Bullet}
+ */
+Pc.prototype.shot$ = function () {
+	if (this.shot_delay) {
+		return null;
+	}
+	this.shot_delay = 30;
+	return new Bullet$NNN(this.x + this.dir * (Config.objWidth + Pc.shot_dx), this.y, this.dir * Pc.shot_dx);
+};
+
+/**
  */
 Pc.prototype.tick$ = function () {
 	var $math_abs_t;
+	if (this.shot_delay) {
+		-- this.shot_delay;
+	}
 	if ((($math_abs_t = this.dx) >= 0 ? $math_abs_t : -$math_abs_t) >= 0.1) {
 		this.dx -= 0.05 * ((($math_abs_t = this.dx) >= 0 ? $math_abs_t : -$math_abs_t) / this.dx);
 	} else {
@@ -970,12 +1094,26 @@ Config.goalMessage = "Congratulation!";
 Config.deadMessage = "Game Over";
 Stage.stage_number = 0;
 $__jsx_lazy_init(Stage, "enemies", function () {
-	return [ [ new WalkingEnemy$NNN(0, 0, 0) ], [ new WalkingEnemy$NNN(10, 40, 1) ], [ new WalkingEnemy$NNN(0, 0, 0) ] ];
+	return [ [ new WalkingEnemy$NNN(80, 200, 1), new WalkingEnemy$NNN(90, 60, 1) ], [ new WalkingEnemy$NNN(80, 120, 0.5), new WalkingEnemy$NNN(80, 150, 3), new WalkingEnemy$NNN(140, 140, 0), new WalkingEnemy$NNN(10, 40, 1), new WalkingEnemy$NNN(80, 200, 1), new FlyingEnemy$NNF$NHN$(70, 40, (function (tick_count) {
+		/** @type {!number} */
+		var dx;
+		/** @type {!number} */
+		var dy;
+		dx = Math.sin(tick_count / Config.fps * 3.14);
+		dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
+		return { "dx": dx, "dy": dy };
+	})), new FlyingEnemy$NNF$NHN$(120, 160, (function (tick_count) {
+		/** @type {!number} */
+		var dy;
+		dy = Math.sin(tick_count / Config.fps * 3.14);
+		return { "dx": 0, "dy": dy };
+	})) ], [ new WalkingEnemy$NNN(72, 40, 0), new WalkingEnemy$NNN(80, 158, 3) ] ];
 });
 $__jsx_lazy_init(Stage, "map", function () {
 	return [ [ "============       =", "=      =           =", "       =           =", "       =     ===   =", "=                  =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "=  =               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         ====     =", "=                  =", "=                  =", "=                  =", "=   ================", "=                  =", "=                  =", "====================" ], [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         =        =", "=         =        =", "=   ====     =     =", "=      =     =     =", "=      =======     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                  =", "=             =    =", "=                  =", "=                  =", "=                  =", "=                  =", "=        =         =", "=  =               =", "=                  =", "=    ===============", "=                  =", "=                  =", "= = = = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "====================" ] ];
 });
 Pc.max_dx = 2;
+Pc.shot_dx = 3;
 js.global = (function () { return this; })();
 
 var $__jsx_classMap = {
@@ -1020,6 +1158,8 @@ var $__jsx_classMap = {
 		Obj$: Obj$,
 		Enemy: Enemy,
 		Enemy$: Enemy$,
+		Bullet: Bullet,
+		Bullet$NNN: Bullet$NNN,
 		FlyingEnemy: FlyingEnemy,
 		FlyingEnemy$NNF$NHN$: FlyingEnemy$NNF$NHN$,
 		WalkingObj: WalkingObj,
