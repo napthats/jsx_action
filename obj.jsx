@@ -9,6 +9,7 @@ mixin Obj {
 
     abstract var character : string;
 
+
     function hit(other : Obj) : boolean {
         return Math.abs(this.x - other.x) < Config.objWidth
         && Math.abs(this.y - other.y) < Config.objHeight;
@@ -29,7 +30,9 @@ mixin Obj {
     abstract function tick() : void;
 }
 
-final class Enemy implements Obj {
+mixin Enemy implements Obj {}
+
+abstract class WalkingObj implements Obj {
     var x : number;
     var y : number;
     var dx : number;
@@ -37,50 +40,49 @@ final class Enemy implements Obj {
     var onGround : boolean;
     var character : string;
 
-    function constructor(_x : number, _y : number, _dx : number) {
+    function constructor(_x : number, _y : number, _character : string) {
         this.x = _x;
         this.y = _y;
-        this.dx = _dx;
+        this.character = _character;
+        this.dx = 0;
         this.dy = 0;
         this.onGround = false;
-        this.character = "E";
     }
 
     override function tick() : void {
-        if (this.onGround && !this.hitGround(this.dx, 0) && this.hitGround(this.dx, 1))
-            this.x += this.dx;
-        else this.dx = -this.dx;
-
-        if (this.hitGround(0, 1)) {this.dy = 0; this.onGround = true;}
+        if (this.dy >= 0 && this.hitGround(0, 1)) {this.dy = 0; this.onGround = true;}
         else {
-            this.onGround = false;
             this.dy += 0.2;
-            if (this.hitGround(0, this.dy)) this.y += 1;
-            else this.y += this.dy;
+            this.onGround = false;
+            if (this.dy <= 0 && this.hitGround(0, -1)) this.dy = 0;
+            else {
+                if (this.hitGround(0, this.dy)) this.y += 1;
+                else this.y += this.dy;
+            }
         }
     }
 }
 
-final class Pc implements Obj {
+final class WalkingEnemy extends WalkingObj implements Enemy {
+
+    function constructor(_x : number, _y : number, _dx : number) {
+        super(_x, _y, "E");
+        this.dx = _dx;
+    }
+
+    override function tick() : void {
+        super.tick();
+        if (this.onGround && !this.hitGround(this.dx, 0) && this.hitGround(this.dx, 1))
+            this.x += this.dx;
+        else this.dx = -this.dx;
+    }
+}
+
+final class Pc extends WalkingObj {
     static var max_dx = 2;
 
-    var x : number;
-    var y : number;
-
-    var onGround : boolean;
-
-    var dx : number;
-    var dy : number;
-
-    var character : string;
-
     function constructor(_x : number, _y : number) {
-        this.x = _x;
-        this.y = _y;
-        this.character = "@";
-        this.dx = 0;
-        this.dy = 0;
-        this.onGround = false;
+        super(_x, _y, "@");
     }
 
     function move(pow : number) : void {
@@ -92,21 +94,11 @@ final class Pc implements Obj {
     }
 
     override function tick() : void {
+        super.tick();
         if (Math.abs(this.dx) >= 0.1) {this.dx -= 0.05 * (Math.abs(this.dx) / this.dx);}
         else {this.dx = 0;}
 
         if (this.hitGround(this.dx, 0)) this.dx = 0;
         else this.x += this.dx;
-
-        if (this.dy >= 0 && this.hitGround(0, 1)) {this.dy = 0; this.onGround = true;}
-        else {
-            this.dy += 0.2;
-            this.onGround = false;
-            if (this.dy <= 0 && this.hitGround(0, -1)) this.dy = 0;
-            else {
-                if (this.hitGround(0, this.dy)) this.y += 1;
-                else this.y += this.dy;
-            }
-        }
     }
 }

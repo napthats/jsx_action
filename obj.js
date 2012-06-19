@@ -92,14 +92,82 @@ Obj.prototype.draw$LCanvasRenderingContext2D$ = function (context) {
 };
 
 /**
- * class Enemy extends Object
- * @constructor
+ * class Enemy * @constructor
  */
 function Enemy() {
 }
 
-Enemy.prototype = new Object;
 $__jsx_merge_interface(Enemy, Obj);
+
+Enemy.prototype.$__jsx_implements_Enemy = true;
+
+/**
+ * @constructor
+ */
+function Enemy$() {
+	Obj$.call(this);
+};
+
+Enemy$.prototype = new Enemy;
+
+/**
+ * class WalkingObj extends Object
+ * @constructor
+ */
+function WalkingObj() {
+}
+
+WalkingObj.prototype = new Object;
+$__jsx_merge_interface(WalkingObj, Obj);
+
+/**
+ * @constructor
+ * @param {!number} _x
+ * @param {!number} _y
+ * @param {!string} _character
+ */
+function WalkingObj$NNS(_x, _y, _character) {
+	Obj$.call(this);
+	this.x = _x;
+	this.y = _y;
+	this.character = _character;
+	this.dx = 0;
+	this.dy = 0;
+	this.onGround = false;
+};
+
+WalkingObj$NNS.prototype = new WalkingObj;
+
+/**
+ */
+WalkingObj.prototype.tick$ = function () {
+	if (this.dy >= 0 && this.hitGround$NN(0, 1)) {
+		this.dy = 0;
+		this.onGround = true;
+	} else {
+		this.dy += 0.2;
+		this.onGround = false;
+		if (this.dy <= 0 && this.hitGround$NN(0, - 1)) {
+			this.dy = 0;
+		} else {
+			if (this.hitGround$NN(0, this.dy)) {
+				this.y += 1;
+			} else {
+				this.y += this.dy;
+			}
+		}
+	}
+};
+
+/**
+ * class WalkingEnemy extends WalkingObj
+ * @constructor
+ */
+function WalkingEnemy() {
+}
+
+WalkingEnemy.prototype = new WalkingObj;
+$__jsx_merge_interface(WalkingEnemy, Enemy);
 
 /**
  * @constructor
@@ -107,63 +175,40 @@ $__jsx_merge_interface(Enemy, Obj);
  * @param {!number} _y
  * @param {!number} _dx
  */
-function Enemy$NNN(_x, _y, _dx) {
-	Obj$.call(this);
-	this.x = _x;
-	this.y = _y;
+function WalkingEnemy$NNN(_x, _y, _dx) {
+	WalkingObj$NNS.call(this, _x, _y, "E");
+	Enemy$.call(this);
 	this.dx = _dx;
-	this.dy = 0;
-	this.onGround = false;
-	this.character = "E";
 };
 
-Enemy$NNN.prototype = new Enemy;
+WalkingEnemy$NNN.prototype = new WalkingEnemy;
 
 /**
  */
-Enemy.prototype.tick$ = function () {
+WalkingEnemy.prototype.tick$ = function () {
+	WalkingObj.prototype.tick$.call(this);
 	if (this.onGround && ! this.hitGround$NN(this.dx, 0) && this.hitGround$NN(this.dx, 1)) {
 		this.x += this.dx;
 	} else {
 		this.dx = - this.dx;
 	}
-	if (this.hitGround$NN(0, 1)) {
-		this.dy = 0;
-		this.onGround = true;
-	} else {
-		this.onGround = false;
-		this.dy += 0.2;
-		if (this.hitGround$NN(0, this.dy)) {
-			this.y += 1;
-		} else {
-			this.y += this.dy;
-		}
-	}
 };
 
 /**
- * class Pc extends Object
+ * class Pc extends WalkingObj
  * @constructor
  */
 function Pc() {
 }
 
-Pc.prototype = new Object;
-$__jsx_merge_interface(Pc, Obj);
-
+Pc.prototype = new WalkingObj;
 /**
  * @constructor
  * @param {!number} _x
  * @param {!number} _y
  */
 function Pc$NN(_x, _y) {
-	Obj$.call(this);
-	this.x = _x;
-	this.y = _y;
-	this.character = "@";
-	this.dx = 0;
-	this.dy = 0;
-	this.onGround = false;
+	WalkingObj$NNS.call(this, _x, _y, "@");
 };
 
 Pc$NN.prototype = new Pc;
@@ -191,6 +236,7 @@ Pc.prototype.jump$N = function (pow) {
  */
 Pc.prototype.tick$ = function () {
 	var $math_abs_t;
+	WalkingObj.prototype.tick$.call(this);
 	if ((($math_abs_t = this.dx) >= 0 ? $math_abs_t : -$math_abs_t) >= 0.1) {
 		this.dx -= 0.05 * ((($math_abs_t = this.dx) >= 0 ? $math_abs_t : -$math_abs_t) / this.dx);
 	} else {
@@ -200,22 +246,6 @@ Pc.prototype.tick$ = function () {
 		this.dx = 0;
 	} else {
 		this.x += this.dx;
-	}
-	if (this.dy >= 0 && this.hitGround$NN(0, 1)) {
-		this.dy = 0;
-		this.onGround = true;
-	} else {
-		this.dy += 0.2;
-		this.onGround = false;
-		if (this.dy <= 0 && this.hitGround$NN(0, - 1)) {
-			this.dy = 0;
-		} else {
-			if (this.hitGround$NN(0, this.dy)) {
-				this.y += 1;
-			} else {
-				this.y += this.dy;
-			}
-		}
 	}
 };
 
@@ -403,7 +433,11 @@ var $__jsx_classMap = {
 		Obj: Obj,
 		Obj$: Obj$,
 		Enemy: Enemy,
-		Enemy$NNN: Enemy$NNN,
+		Enemy$: Enemy$,
+		WalkingObj: WalkingObj,
+		WalkingObj$NNS: WalkingObj$NNS,
+		WalkingEnemy: WalkingEnemy,
+		WalkingEnemy$NNN: WalkingEnemy$NNN,
 		Pc: Pc,
 		Pc$NN: Pc$NN
 	},

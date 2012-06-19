@@ -37,7 +37,7 @@ final class Game {
 
         this.pc = new Pc(Config.defaultX, Config.defaultY);
 
-        this.enemies = [new Enemy(80, 120, 1), new Enemy(80, 150, 1)];
+        this.enemies = [new WalkingEnemy(80, 120, 1) as Enemy, new WalkingEnemy(80, 150, 1) as Enemy];
 
         var body = dom.window.document.body;
         body.addEventListener(
