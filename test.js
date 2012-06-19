@@ -90,7 +90,7 @@ function Game$LHTMLCanvasElement$(canvas) {
 	this.ctx = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
 	if (! (this.ctx != null)) {
 		debugger;
-		throw new Error("[test.jsx:31] assertion failure");
+		throw new Error("[test.jsx:35] assertion failure");
 	}
 	this.ctx.font = Config.font;
 	this.pc = new Pc$NN(Config.defaultX, Config.defaultY);
@@ -108,11 +108,14 @@ function Game$LHTMLCanvasElement$(canvas) {
 			case Key.right_code:
 				Key.right = true;
 				break;
-			case Key.down_code:
-				Key.down = true;
-				break;
 			case Key.left_code:
 				Key.left = true;
+				break;
+			case Key.z_code:
+				Key.z = true;
+				break;
+			case Key.x_code:
+				Key.x = true;
 				break;
 			}
 		}
@@ -129,11 +132,14 @@ function Game$LHTMLCanvasElement$(canvas) {
 			case Key.right_code:
 				Key.right = false;
 				break;
-			case Key.down_code:
-				Key.down = false;
-				break;
 			case Key.left_code:
 				Key.left = false;
+				break;
+			case Key.z_code:
+				Key.z = false;
+				break;
+			case Key.x_code:
+				Key.x = false;
 				break;
 			}
 		}
@@ -162,7 +168,7 @@ Game.prototype.tick$ = function () {
 	if (Key.left) {
 		this.pc.move$N(- 1);
 	}
-	if (Key.up) {
+	if (Key.up || Key.z) {
 		this.pc.jump$N(4.5);
 	}
 	this.pc.tick$();
@@ -178,7 +184,7 @@ Game.prototype.tick$ = function () {
 		if (this.pc.hit$LObj$((function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[test.jsx:90] detected misuse of 'undefined' as type 'Enemy'");
+				throw new Error("[test.jsx:96] detected misuse of 'undefined' as type 'Enemy'");
 			}
 			return v;
 		}(this.enemies[i])))) {
@@ -224,13 +230,13 @@ _Main.main$AS = function (args) {
 	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[test.jsx:103] detected misuse of 'undefined' as type 'string'");
+			throw new Error("[test.jsx:109] detected misuse of 'undefined' as type 'string'");
 		}
 		return v;
 	}(args[0]))));
 	if (! (canvas != null)) {
 		debugger;
-		throw new Error("[test.jsx:104] assertion failure");
+		throw new Error("[test.jsx:110] assertion failure");
 	}
 	game = new Game$LHTMLCanvasElement$(canvas);
 	game.tick$();
@@ -567,12 +573,14 @@ js$.prototype = new js;
 
 Key.up_code = 38;
 Key.right_code = 39;
-Key.down_code = 40;
 Key.left_code = 37;
+Key.z_code = 90;
+Key.x_code = 88;
 Key.up = false;
 Key.right = false;
-Key.down = false;
 Key.left = false;
+Key.z = false;
+Key.x = false;
 $__jsx_lazy_init(dom, "window", function () {
 	return js.global.window;
 });

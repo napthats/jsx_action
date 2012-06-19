@@ -6,13 +6,17 @@ import 'obj.jsx';
 final class Key {
     static const up_code = 38;
     static const right_code = 39;
-    static const down_code = 40;
+//    static const down_code = 40;
     static const left_code = 37;
+    static const z_code = 90;
+    static const x_code = 88;
 
     static var up = false;
     static var right = false;
-    static var down = false;
+//    static var down = false;
     static var left = false;
+    static var z = false;
+    static var x = false;
 }
 
 
@@ -44,8 +48,9 @@ final class Game {
                     switch (ke.keyCode) {
                         case Key.up_code: {Key.up = true; break;}
                         case Key.right_code: {Key.right = true; break;}
-                        case Key.down_code: {Key.down = true; break;}
                         case Key.left_code: {Key.left = true; break;}
+                        case Key.z_code: {Key.z = true; break;}
+                        case Key.x_code: {Key.x = true; break;}
                     }
                 }
             }
@@ -58,8 +63,9 @@ final class Game {
                     switch (ke.keyCode) {
                         case Key.up_code: {Key.up = false; break;}
                         case Key.right_code: {Key.right = false; break;}
-                        case Key.down_code: {Key.down = false; break;}
                         case Key.left_code: {Key.left = false; break;}
+                        case Key.z_code: {Key.z = false; break;}
+                        case Key.x_code: {Key.x = false; break;}
                     }
                 }
             }
@@ -77,7 +83,7 @@ final class Game {
       
         if (Key.right) this.pc.move(1);
         if (Key.left) this.pc.move(-1);
-        if (Key.up) this.pc.jump(4.5);
+        if (Key.up || Key.z) this.pc.jump(4.5);
 
         this.pc.tick();
         if (this.pc.y - Config.objHeight * 1.5 > 0) this.pc.draw(this.ctx);
