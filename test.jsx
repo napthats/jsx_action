@@ -150,6 +150,7 @@ final class Game {
         }
 
         var deadCheck = [] : Array.<number>;
+        var newEnemies = [] : Array.<Enemy>;
         for (var i = 0; i < this.enemies.length; ++i) {
             var enemy : Enemy = this.enemies[i];
             enemy.tick();
@@ -158,9 +159,15 @@ final class Game {
 
             if (enemy instanceof Bullet) {
                 for (var j = 0; j < this.enemies.length; ++j) {
-                    if (i != j && enemy.hit(this.enemies[j])) {
+                    var aenemy : Enemy = this.enemies[j];
+                    if (i != j && enemy.hit(aenemy)) {
                         enemy.damage();
-                        this.enemies[j].damage();
+                        if (aenemy instanceof MirrorEnemy) {
+                            var bullet = enemy as Bullet;
+                            var menemy = aenemy as MirrorEnemy;
+                            newEnemies.push(menemy.mirror(bullet.dx));
+                        }
+                        else aenemy.damage();
                     }
                 }
             }
@@ -172,7 +179,7 @@ final class Game {
             if (enemy instanceof ShotEnemy && Math.abs(this.pc.y - enemy.y) < Config.objHeight) {
                 var senemy = enemy as ShotEnemy;
                 var bullet = senemy.shot(Math.abs(this.pc.x - enemy.x) / (this.pc.x - enemy.x));
-                if (bullet) this.enemies.push(bullet);
+                if (bullet) newEnemies.push(bullet);
             }
         }
         for (var i = 0; i < deadCheck.length; ++i) {
@@ -181,6 +188,9 @@ final class Game {
                 if (deadCheck[i] != j) l.push(this.enemies[j]);
             }
             this.enemies = l;
+        }
+        for (var i = 0; i < newEnemies.length; ++i) {
+            this.enemies.push(newEnemies[i]);
         }
     }
 

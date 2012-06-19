@@ -175,13 +175,24 @@ class ShotEnemy extends WalkingEnemy {
     
     function shot (dx : number) : Bullet {
         if (this.shot_delay) return null;
-        this.shot_delay = 120;
+        this.shot_delay = 90;
         return new Bullet(this.x + (Math.abs(dx)/dx * Config.objWidth + dx), this.y, dx);
     }
 
     override function tick() : void {
         super.tick();
         if (this.shot_delay) --this.shot_delay;
+    }
+}
+
+class MirrorEnemy extends WalkingEnemy {
+    function constructor(_x : number, _y : number, _dx : number) {
+        super(_x, _y, _dx);
+        this.character = "M";
+    }
+
+    function mirror(dx : number) : Bullet {
+        return new Bullet(this.x - Math.abs(dx)/dx * Config.objWidth * 2 - dx, this.y, -dx);
     }
 }
 

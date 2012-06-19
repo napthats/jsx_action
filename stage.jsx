@@ -27,34 +27,6 @@ final class Stage {
         [new Item(124, 216)]
     ];
 
-    static const enemies = [
-//
-//        [new WalkingEnemy(0,0,0) as Enemy],[new WalkingEnemy(10,40,1) as Enemy],[new WalkingEnemy(0,0,0) as Enemy]];
-        [new WalkingEnemy(80, 200, 1) as Enemy,
-         new WalkingEnemy(90, 60, 1) as Enemy
-        ],
-        [new WalkingEnemy(80, 120, 0.5) as Enemy,
-         new WalkingEnemy(80, 150, 3) as Enemy,
-         new ShotEnemy(140, 120, 0) as Enemy,
-         new WalkingEnemy(10, 40, 1) as Enemy,
-         new WalkingEnemy(80, 200, 1) as Enemy,
-         new FlyingEnemy(70, 40,
-             function(tick_count : number) : Map.<number> {
-                 var dx = Math.sin(tick_count / Config.fps * 3.14);
-                 var dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
-                 return {"dx": dx, "dy": dy};}
-         ) as Enemy,
-         new FlyingEnemy(120, 160,
-             function(tick_count : number) : Map.<number> {
-                 var dy = Math.sin(tick_count / Config.fps * 3.14);
-                 return {"dx": 0, "dy": dy};}
-         ) as Enemy
-        ],
-        [new ShotEnemy(72, 60, 0) as Enemy,
-         new WalkingEnemy(80, 158, 3) as Enemy,
-         new WalkingEnemy(100, 100, 3) as Enemy
-        ]];
-
     static const map = [
         [[
         "============       =",
@@ -129,9 +101,9 @@ final class Stage {
         "=             ======",
         "=                  =",
         "=                  =",
-        "=                  =",
-        "=                  =",
-        "=   =    =        ==",
+        "=               =  =",
+        "=               =  =",
+        "=   =    =      ====",
         "=                  =",
         "=                  =",
         "=      =============",
@@ -164,21 +136,21 @@ final class Stage {
         "=              =   =",
         "=              =   =",
         "=        =======   =",
-        "=  =               =",
-        "=                  =",
-        "=   ==             =",
-        "=                  =",
-        "=                  =",
-        "=        ====      =",
+        "=   =              =",
         "=                  =",
         "=                  =",
         "=                  =",
         "=                  =",
-        "==============   ===",
-        "=       ======     =",
-        "=       ======     =",
+        "=        ====== =  =",
         "=                  =",
-        "=               ====",
+        "=                  =",
+        "=                  =",
+        "=                  =",
+        "================   =",
+        "=   ============   =",
+        "=   ============   =",
+        "=                  =",
+        "=                  =",
         "=   ================",
         "=                  =",
         "=                  =",
@@ -209,7 +181,7 @@ final class Stage {
         "==============   ===",
         "=         =        =",
         "=         =        =",
-        "=   ====     =     =",
+        "=   ====     ==    =",
         "=      =     =     =",
         "=      =======     =",
         "=                  =",
@@ -252,7 +224,38 @@ final class Stage {
 
 
     static function getEnemies() : Array.<Enemy> {
-        return Stage.enemies[Stage.stage_number];
+        if (Stage.stage_number == 0) {
+            return [new WalkingEnemy(80, 200, 1) as Enemy,
+                new WalkingEnemy(80, 160, 3) as Enemy,
+                new WalkingEnemy(90, 60, 1) as Enemy];
+        }
+        else if (Stage.stage_number == 1) {
+            return [new MirrorEnemy(80, 120, 0.5) as Enemy,
+                new WalkingEnemy(80, 150, 3) as Enemy,
+                new ShotEnemy(140, 120, 0) as Enemy,
+                new MirrorEnemy(10, 40, 1) as Enemy,
+                new WalkingEnemy(80, 200, 1) as Enemy,
+                new FlyingEnemy(70, 40,
+                    function(tick_count : number) : Map.<number> {
+                        var dx = Math.sin(tick_count / Config.fps * 3.14);
+                        var dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
+                        return {"dx": dx, "dy": dy};}
+                ) as Enemy,
+                new FlyingEnemy(116, 160,
+                    function(tick_count : number) : Map.<number> {
+                        var dy = Math.sin(tick_count / Config.fps * 3.14);
+                        return {"dx": 0, "dy": dy};}
+                ) as Enemy
+                ];
+        }
+        else if (Stage.stage_number == 2) {
+            return [new ShotEnemy(72, 60, 0) as Enemy,
+                new ShotEnemy(143, 60, 0) as Enemy,
+                new WalkingEnemy(80, 158, 3) as Enemy,
+                new WalkingEnemy(100, 100, 3) as Enemy];
+        }
+        else assert(false);
+        return [] : Array.<Enemy>;
     }
 
     static function getItems() : Array.<Item> {

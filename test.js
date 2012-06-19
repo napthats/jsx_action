@@ -167,10 +167,16 @@ Game.prototype.tick$ = function () {
 	var i;
 	/** @type {Array.<undefined|!number>} */
 	var deadCheck;
+	/** @type {Array.<undefined|Enemy>} */
+	var newEnemies;
 	/** @type {Enemy} */
 	var enemy;
 	/** @type {!number} */
 	var j;
+	/** @type {Enemy} */
+	var aenemy;
+	/** @type {MirrorEnemy} */
+	var menemy;
 	/** @type {ShotEnemy} */
 	var senemy;
 	/** @type {Array.<undefined|Enemy>} */
@@ -276,11 +282,12 @@ Game.prototype.tick$ = function () {
 		}
 	}
 	deadCheck = [  ];
+	newEnemies = [  ];
 	for (i = 0; i < this.enemies.length; ++ i) {
 		enemy = (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[test.jsx:154] detected misuse of 'undefined' as type 'Enemy'");
+				throw new Error("[test.jsx:155] detected misuse of 'undefined' as type 'Enemy'");
 			}
 			return v;
 		}(this.enemies[i]));
@@ -288,15 +295,22 @@ Game.prototype.tick$ = function () {
 		enemy.draw$LCanvasRenderingContext2D$(this.ctx);
 		if (enemy instanceof Bullet) {
 			for (j = 0; j < this.enemies.length; ++ j) {
-				if (i !== j && enemy.hit$LObj$((function (v) {
+				aenemy = (function (v) {
 					if (! (typeof v !== "undefined")) {
 						debugger;
-						throw new Error("[test.jsx:161] detected misuse of 'undefined' as type 'Enemy'");
+						throw new Error("[test.jsx:162] detected misuse of 'undefined' as type 'Enemy'");
 					}
 					return v;
-				}(this.enemies[j])))) {
+				}(this.enemies[j]));
+				if (i !== j && enemy.hit$LObj$(aenemy)) {
 					enemy.damage$();
-					this.enemies[j].damage$();
+					if (aenemy instanceof MirrorEnemy) {
+						bullet = (function (o) { return o instanceof Bullet ? o : null; })(enemy);
+						menemy = (function (o) { return o instanceof MirrorEnemy ? o : null; })(aenemy);
+						newEnemies.push(menemy.mirror$N(bullet.dx));
+					} else {
+						aenemy.damage$();
+					}
 				}
 			}
 		}
@@ -311,7 +325,7 @@ Game.prototype.tick$ = function () {
 			senemy = (function (o) { return o instanceof ShotEnemy ? o : null; })(enemy);
 			bullet = senemy.shot$N((($math_abs_t = this.pc.x - enemy.x) >= 0 ? $math_abs_t : -$math_abs_t) / (this.pc.x - enemy.x));
 			if (bullet) {
-				this.enemies.push(bullet);
+				newEnemies.push(bullet);
 			}
 		}
 	}
@@ -322,13 +336,22 @@ Game.prototype.tick$ = function () {
 				l.push((function (v) {
 					if (! (typeof v !== "undefined")) {
 						debugger;
-						throw new Error("[test.jsx:181] detected misuse of 'undefined' as type 'Enemy'");
+						throw new Error("[test.jsx:188] detected misuse of 'undefined' as type 'Enemy'");
 					}
 					return v;
 				}(this.enemies[j])));
 			}
 		}
 		this.enemies = l;
+	}
+	for (i = 0; i < newEnemies.length; ++ i) {
+		this.enemies.push((function (v) {
+			if (! (typeof v !== "undefined")) {
+				debugger;
+				throw new Error("[test.jsx:193] detected misuse of 'undefined' as type 'Enemy'");
+			}
+			return v;
+		}(newEnemies[i])));
 	}
 };
 
@@ -368,13 +391,13 @@ _Main.main$AS = function (args) {
 	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[test.jsx:196] detected misuse of 'undefined' as type 'string'");
+			throw new Error("[test.jsx:206] detected misuse of 'undefined' as type 'string'");
 		}
 		return v;
 	}(args[0]))));
 	if (! (canvas != null)) {
 		debugger;
-		throw new Error("[test.jsx:197] assertion failure");
+		throw new Error("[test.jsx:207] assertion failure");
 	}
 	game = new Game$LHTMLCanvasElement$(canvas);
 	game.tick$();
@@ -573,7 +596,6 @@ $__jsx_merge_interface(Outer, Region);
  * @param {Direction} d
  */
 function Outer$LDirection$(d) {
-	var $this = this;
 	Region$.call(this);
 	this.direction = d;
 };
@@ -619,7 +641,36 @@ Stage$.prototype = new Stage;
  * @return {Array.<undefined|Enemy>}
  */
 Stage.getEnemies$ = function () {
-	return Stage.enemies[Stage.stage_number];
+	if (Stage.stage_number === 0) {
+		return [ new WalkingEnemy$NNN(80, 200, 1), new WalkingEnemy$NNN(80, 160, 3), new WalkingEnemy$NNN(90, 60, 1) ];
+	} else {
+		if (Stage.stage_number === 1) {
+			return [ new MirrorEnemy$NNN(80, 120, 0.5), new WalkingEnemy$NNN(80, 150, 3), new ShotEnemy$NNN(140, 120, 0), new MirrorEnemy$NNN(10, 40, 1), new WalkingEnemy$NNN(80, 200, 1), new FlyingEnemy$NNF$NHN$(70, 40, (function (tick_count) {
+				/** @type {!number} */
+				var dx;
+				/** @type {!number} */
+				var dy;
+				dx = Math.sin(tick_count / Config.fps * 3.14);
+				dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
+				return { "dx": dx, "dy": dy };
+			})), new FlyingEnemy$NNF$NHN$(116, 160, (function (tick_count) {
+				/** @type {!number} */
+				var dy;
+				dy = Math.sin(tick_count / Config.fps * 3.14);
+				return { "dx": 0, "dy": dy };
+			})) ];
+		} else {
+			if (Stage.stage_number === 2) {
+				return [ new ShotEnemy$NNN(72, 60, 0), new ShotEnemy$NNN(143, 60, 0), new WalkingEnemy$NNN(80, 158, 3), new WalkingEnemy$NNN(100, 100, 3) ];
+			} else {
+				if (! (false)) {
+					debugger;
+					throw new Error("[stage.jsx:257] assertion failure");
+				}
+			}
+		}
+	}
+	return [  ];
 };
 
 var Stage$getEnemies$ = Stage.getEnemies$;
@@ -639,7 +690,7 @@ var Stage$getItems$ = Stage.getItems$;
 Stage.setDifficulty$N = function (d) {
 	if (! (d === 0 || d === 1)) {
 		debugger;
-		throw new Error("[stage.jsx:263] assertion failure");
+		throw new Error("[stage.jsx:266] assertion failure");
 	}
 	Stage.difficulty = d;
 };
@@ -652,7 +703,7 @@ var Stage$setDifficulty$N = Stage.setDifficulty$N;
 Stage.changeStage$N = function (_stage_number) {
 	if (! (_stage_number === 0 || _stage_number === 1 || _stage_number === 2)) {
 		debugger;
-		throw new Error("[stage.jsx:268] assertion failure");
+		throw new Error("[stage.jsx:271] assertion failure");
 	}
 	Stage.stage_number = _stage_number;
 };
@@ -1099,7 +1150,7 @@ ShotEnemy.prototype.shot$N = function (dx) {
 	if (this.shot_delay) {
 		return null;
 	}
-	this.shot_delay = 120;
+	this.shot_delay = 90;
 	return new Bullet$NNN(this.x + ((dx >= 0 ? dx : - dx) / dx * Config.objWidth + dx), this.y, dx);
 };
 
@@ -1110,6 +1161,35 @@ ShotEnemy.prototype.tick$ = function () {
 	if (this.shot_delay) {
 		-- this.shot_delay;
 	}
+};
+
+/**
+ * class MirrorEnemy extends WalkingEnemy
+ * @constructor
+ */
+function MirrorEnemy() {
+}
+
+MirrorEnemy.prototype = new WalkingEnemy;
+/**
+ * @constructor
+ * @param {!number} _x
+ * @param {!number} _y
+ * @param {!number} _dx
+ */
+function MirrorEnemy$NNN(_x, _y, _dx) {
+	WalkingEnemy$NNN.call(this, _x, _y, _dx);
+	this.character = "M";
+};
+
+MirrorEnemy$NNN.prototype = new MirrorEnemy;
+
+/**
+ * @param {!number} dx
+ * @return {Bullet}
+ */
+MirrorEnemy.prototype.mirror$N = function (dx) {
+	return new Bullet$NNN(this.x - (dx >= 0 ? dx : - dx) / dx * Config.objWidth * 2 - dx, this.y, - dx);
 };
 
 /**
@@ -1242,24 +1322,8 @@ Stage.difficulty = 1;
 $__jsx_lazy_init(Stage, "items", function () {
 	return [ [  ], [  ], [ new Item$NN(124, 216) ] ];
 });
-$__jsx_lazy_init(Stage, "enemies", function () {
-	return [ [ new WalkingEnemy$NNN(80, 200, 1), new WalkingEnemy$NNN(90, 60, 1) ], [ new WalkingEnemy$NNN(80, 120, 0.5), new WalkingEnemy$NNN(80, 150, 3), new ShotEnemy$NNN(140, 120, 0), new WalkingEnemy$NNN(10, 40, 1), new WalkingEnemy$NNN(80, 200, 1), new FlyingEnemy$NNF$NHN$(70, 40, (function (tick_count) {
-		/** @type {!number} */
-		var dx;
-		/** @type {!number} */
-		var dy;
-		dx = Math.sin(tick_count / Config.fps * 3.14);
-		dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
-		return { "dx": dx, "dy": dy };
-	})), new FlyingEnemy$NNF$NHN$(120, 160, (function (tick_count) {
-		/** @type {!number} */
-		var dy;
-		dy = Math.sin(tick_count / Config.fps * 3.14);
-		return { "dx": 0, "dy": dy };
-	})) ], [ new ShotEnemy$NNN(72, 60, 0), new WalkingEnemy$NNN(80, 158, 3), new WalkingEnemy$NNN(100, 100, 3) ] ];
-});
 $__jsx_lazy_init(Stage, "map", function () {
-	return [ [ [ "============       =", "=                  =", "                   =", "             ==    =", "                   =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "====               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=       ======     =", "=                  =", "=                  =", "=                  =", "=   ================", "=                  =", "=                  =", "====================" ], [ "===     ============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=           ====   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ========  =", "=                ===", "=                  =", "=                  =", "=                  =", "==============   ===", "=                  =", "=                  =", "=   ====     =     =", "=                  =", "=        === =     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                   ", "=             ======", "=                  =", "=                  =", "=                  =", "=                  =", "=   =    =        ==", "=                  =", "=                  =", "=     =======  =====", "=                  =", "=                  =", "=  == = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "==                 =", "=           =      =", "=                  =", "=      =           =", "=              ==  =", "=              ==  =", "====================" ] ], [ [ "============       =", "=      =           =", "       =           =", "       =     ===   =", "=                  =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "=  =               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=       ======     =", "=       ======     =", "=                  =", "=               ====", "=   ================", "=                  =", "=                  =", "====================" ], [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         =        =", "=         =        =", "=   ====     =     =", "=      =     =     =", "=      =======     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                  =", "=             =    =", "=                  =", "=                  =", "=                  =", "=                  =", "=        =         =", "=                  =", "=                  =", "=    ===============", "=                  =", "=                  =", "= = = = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "==                 =", "=           =      =", "=                  =", "=      =           =", "=              ==  =", "=              ==  =", "====================" ] ] ];
+	return [ [ [ "============       =", "=                  =", "                   =", "             ==    =", "                   =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "====               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=       ======     =", "=                  =", "=                  =", "=                  =", "=   ================", "=                  =", "=                  =", "====================" ], [ "===     ============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=           ====   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ========  =", "=                ===", "=                  =", "=                  =", "=                  =", "==============   ===", "=                  =", "=                  =", "=   ====     =     =", "=                  =", "=        === =     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                   ", "=             ======", "=                  =", "=                  =", "=               =  =", "=               =  =", "=   =    =      ====", "=                  =", "=                  =", "=      =============", "=                  =", "=                  =", "=  == = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "==                 =", "=           =      =", "=                  =", "=      =           =", "=              ==  =", "=              ==  =", "====================" ] ], [ [ "============       =", "=      =           =", "       =           =", "       =     ===   =", "=                  =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "=   =              =", "=                  =", "=                  =", "=                  =", "=                  =", "=        ====== =  =", "=                  =", "=                  =", "=                  =", "=                  =", "================   =", "=   ============   =", "=   ============   =", "=                  =", "=                  =", "=   ================", "=                  =", "=                  =", "====================" ], [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         =        =", "=         =        =", "=   ====     ==    =", "=      =     =     =", "=      =======     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                  =", "=             =    =", "=                  =", "=                  =", "=                  =", "=                  =", "=        =         =", "=                  =", "=                  =", "=    ===============", "=                  =", "=                  =", "= = = = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "==                 =", "=           =      =", "=                  =", "=      =           =", "=              ==  =", "=              ==  =", "====================" ] ] ];
 });
 Pc.max_dx = 2;
 Pc.shot_dx = 3;
@@ -1319,6 +1383,8 @@ var $__jsx_classMap = {
 		WalkingEnemy$NNN: WalkingEnemy$NNN,
 		ShotEnemy: ShotEnemy,
 		ShotEnemy$NNN: ShotEnemy$NNN,
+		MirrorEnemy: MirrorEnemy,
+		MirrorEnemy$NNN: MirrorEnemy$NNN,
 		Pc: Pc,
 		Pc$NN: Pc$NN
 	},
