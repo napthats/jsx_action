@@ -168,6 +168,12 @@ final class Game {
             if (this.enemies[i].isDead()) deadCheck.push(i);
 
             if (this.pc.hit(enemy)) {this.gameEnd(Config.deadMessage); return;}
+
+            if (enemy instanceof ShotEnemy && Math.abs(this.pc.y - enemy.y) < Config.objHeight) {
+                var senemy = enemy as ShotEnemy;
+                var bullet = senemy.shot(Math.abs(this.pc.x - enemy.x) / (this.pc.x - enemy.x));
+                if (bullet) this.enemies.push(bullet);
+            }
         }
         for (var i = 0; i < deadCheck.length; ++i) {
             var l = [] : Array.<Enemy>;

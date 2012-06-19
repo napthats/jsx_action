@@ -35,7 +35,7 @@ final class Stage {
         ],
         [new WalkingEnemy(80, 120, 0.5) as Enemy,
          new WalkingEnemy(80, 150, 3) as Enemy,
-         new WalkingEnemy(140, 140, 0) as Enemy,
+         new ShotEnemy(140, 120, 0) as Enemy,
          new WalkingEnemy(10, 40, 1) as Enemy,
          new WalkingEnemy(80, 200, 1) as Enemy,
          new FlyingEnemy(70, 40,
@@ -50,8 +50,9 @@ final class Stage {
                  return {"dx": 0, "dy": dy};}
          ) as Enemy
         ],
-        [new WalkingEnemy(72, 40, 0) as Enemy,
-         new WalkingEnemy(80, 158, 3) as Enemy
+        [new ShotEnemy(72, 60, 0) as Enemy,
+         new WalkingEnemy(80, 158, 3) as Enemy,
+         new WalkingEnemy(100, 100, 3) as Enemy
         ]];
 
     static const map = [
@@ -88,7 +89,7 @@ final class Stage {
         "===================="
         ],
         [
-        "===    =============",
+        "===     ============",
         "=                  =",
         "=                  =",
         "=                  =",
@@ -104,17 +105,17 @@ final class Stage {
         "======             =",
         "=                  =",
         "=                  =",
-        "=        ====      =",
+        "=        ========  =",
+        "=                ===",
         "=                  =",
         "=                  =",
         "=                  =",
-        "=                  =",
-        "=============    ===",
+        "==============   ===",
         "=                  =",
         "=                  =",
         "=   ====     =     =",
         "=                  =",
-        "=        ===       =",
+        "=        === =     =",
         "=                  =",
         "=                  =",
         "============       ="
@@ -125,15 +126,15 @@ final class Stage {
         "=                   ",
         "=                   ",
         "=                   ",
-        "=             =   ==",
+        "=             ======",
         "=                  =",
         "=                  =",
         "=                  =",
         "=                  =",
-        "=        =         =",
-        "=  =               =",
+        "=   =    =        ==",
         "=                  =",
-        "=     ==============",
+        "=                  =",
+        "=      =============",
         "=                  =",
         "=                  =",
         "=  == = = = = = =  =",
@@ -227,7 +228,7 @@ final class Stage {
         "=                  =",
         "=                  =",
         "=        =         =",
-        "=  =               =",
+        "=                  =",
         "=                  =",
         "=    ===============",
         "=                  =",

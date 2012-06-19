@@ -147,7 +147,7 @@ abstract class WalkingObj implements Obj {
     }
 }
 
-final class WalkingEnemy extends WalkingObj implements Enemy {
+class WalkingEnemy extends WalkingObj implements Enemy {
     var hp : number;
 
     function constructor(_x : number, _y : number, _dx : number) {
@@ -161,6 +161,27 @@ final class WalkingEnemy extends WalkingObj implements Enemy {
             this.x += this.dx;
         else this.dx = -this.dx;
         super.tick();
+    }
+}
+
+class ShotEnemy extends WalkingEnemy {
+    var shot_delay : number;
+
+    function constructor(_x : number, _y : number, _dx : number) {
+        super(_x, _y, _dx);
+        this.character = "S";
+        this.shot_delay = 0;
+    }
+    
+    function shot (dx : number) : Bullet {
+        if (this.shot_delay) return null;
+        this.shot_delay = 120;
+        return new Bullet(this.x + (Math.abs(dx)/dx * Config.objWidth + dx), this.y, dx);
+    }
+
+    override function tick() : void {
+        super.tick();
+        if (this.shot_delay) --this.shot_delay;
     }
 }
 
