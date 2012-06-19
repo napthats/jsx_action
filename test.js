@@ -51,6 +51,246 @@ JSX.require = function (path) {
 	return m !== undefined ? m : null;
 }
 /**
+ * class Key extends Object
+ * @constructor
+ */
+function Key() {
+}
+
+Key.prototype = new Object;
+/**
+ * @constructor
+ */
+function Key$() {
+};
+
+Key$.prototype = new Key;
+
+/**
+ * class Game extends Object
+ * @constructor
+ */
+function Game() {
+}
+
+Game.prototype = new Object;
+/**
+ * @constructor
+ * @param {HTMLCanvasElement} canvas
+ */
+function Game$LHTMLCanvasElement$(canvas) {
+	var $this = this;
+	/** @type {HTMLElement} */
+	var body;
+	this.pc = null;
+	this.enemies = null;
+	this.isEnd = false;
+	canvas.width = (Config.canvasWidth | 0);
+	canvas.height = (Config.canvasHeight | 0);
+	this.ctx = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
+	if (! (this.ctx != null)) {
+		debugger;
+		throw new Error("[test.jsx:31] assertion failure");
+	}
+	this.ctx.font = Config.font;
+	this.pc = new Pc$NN(Config.defaultX, Config.defaultY);
+	this.enemies = [ new Enemy$NNN(80, 120, 1), new Enemy$NNN(80, 150, 1) ];
+	body = dom.window.document.body;
+	body.addEventListener("keydown", (function (e) {
+		/** @type {KeyboardEvent} */
+		var ke;
+		if (e instanceof KeyboardEvent) {
+			ke = (function (o) { return o instanceof KeyboardEvent ? o : null; })(e);
+			switch (ke.keyCode) {
+			case Key.up_code:
+				Key.up = true;
+				break;
+			case Key.right_code:
+				Key.right = true;
+				break;
+			case Key.down_code:
+				Key.down = true;
+				break;
+			case Key.left_code:
+				Key.left = true;
+				break;
+			}
+		}
+	}));
+	body.addEventListener("keyup", (function (e) {
+		/** @type {KeyboardEvent} */
+		var ke;
+		if (e instanceof KeyboardEvent) {
+			ke = (function (o) { return o instanceof KeyboardEvent ? o : null; })(e);
+			switch (ke.keyCode) {
+			case Key.up_code:
+				Key.up = false;
+				break;
+			case Key.right_code:
+				Key.right = false;
+				break;
+			case Key.down_code:
+				Key.down = false;
+				break;
+			case Key.left_code:
+				Key.left = false;
+				break;
+			}
+		}
+	}));
+};
+
+Game$LHTMLCanvasElement$.prototype = new Game;
+
+/**
+ */
+Game.prototype.tick$ = function () {
+	var $this = this;
+	/** @type {!number} */
+	var i;
+	if (this.isEnd) {
+		return;
+	}
+	dom.window.setTimeout((function () {
+		$this.tick$();
+	}), 1000 / Config.fps);
+	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
+	Ground$draw$LCanvasRenderingContext2D$(this.ctx);
+	if (Key.right) {
+		this.pc.move$N(1);
+	}
+	if (Key.left) {
+		this.pc.move$N(- 1);
+	}
+	if (Key.up) {
+		this.pc.jump$N(4.5);
+	}
+	this.pc.tick$();
+	if (this.pc.y - Config.objHeight * 1.5 > 0) {
+		this.pc.draw$LCanvasRenderingContext2D$(this.ctx);
+	} else {
+		this.gameEnd$S(Config.goalMessage);
+		return;
+	}
+	for (i = 0; i < this.enemies.length; ++ i) {
+		this.enemies[i].tick$();
+		this.enemies[i].draw$LCanvasRenderingContext2D$(this.ctx);
+		if (this.pc.hit$LObj$((function (v) {
+			if (! (typeof v !== "undefined")) {
+				debugger;
+				throw new Error("[test.jsx:90] detected misuse of 'undefined' as type 'Enemy'");
+			}
+			return v;
+		}(this.enemies[i])))) {
+			this.gameEnd$S(Config.deadMessage);
+			return;
+		}
+	}
+};
+
+/**
+ * @param {!string} msg
+ */
+Game.prototype.gameEnd$S = function (msg) {
+	this.isEnd = true;
+	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
+	this.ctx.fillText(msg, Config.messageX, Config.messageY);
+};
+
+/**
+ * class _Main extends Object
+ * @constructor
+ */
+function _Main() {
+}
+
+_Main.prototype = new Object;
+/**
+ * @constructor
+ */
+function _Main$() {
+};
+
+_Main$.prototype = new _Main;
+
+/**
+ * @param {Array.<undefined|!string>} args
+ */
+_Main.main$AS = function (args) {
+	/** @type {HTMLCanvasElement} */
+	var canvas;
+	/** @type {Game} */
+	var game;
+	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
+		if (! (typeof v !== "undefined")) {
+			debugger;
+			throw new Error("[test.jsx:103] detected misuse of 'undefined' as type 'string'");
+		}
+		return v;
+	}(args[0]))));
+	if (! (canvas != null)) {
+		debugger;
+		throw new Error("[test.jsx:104] assertion failure");
+	}
+	game = new Game$LHTMLCanvasElement$(canvas);
+	game.tick$();
+};
+
+var _Main$main$AS = _Main.main$AS;
+
+/**
+ * class dom extends Object
+ * @constructor
+ */
+function dom() {
+}
+
+dom.prototype = new Object;
+/**
+ * @constructor
+ */
+function dom$() {
+};
+
+dom$.prototype = new dom;
+
+/**
+ * @param {!string} id
+ * @return {HTMLElement}
+ */
+dom.id$S = function (id) {
+	return (function (o) { return o instanceof HTMLElement ? o : null; })(dom.window.document.getElementById(id));
+};
+
+var dom$id$S = dom.id$S;
+
+/**
+ * @param {!string} id
+ * @return {HTMLElement}
+ */
+dom.getElementById$S = function (id) {
+	return (function (o) { return o instanceof HTMLElement ? o : null; })(dom.window.document.getElementById(id));
+};
+
+var dom$getElementById$S = dom.getElementById$S;
+
+/**
+ * @param {!string} tag
+ * @return {HTMLElement}
+ */
+dom.createElement$S = function (tag) {
+	return (function (v) {
+		if (! (v === null || v instanceof HTMLElement)) {
+			debugger;
+			throw new Error("[/home/napthats/Downloads/JSX/lib/js/js/web.jsx:30] detected invalid cast, value is not an instance of the designated type or null");
+		}
+		return v;
+	}(dom.window.document.createElement(tag)));
+};
+
+var dom$createElement$S = dom.createElement$S;
+
+/**
  * class Config extends Object
  * @constructor
  */
@@ -139,22 +379,6 @@ Ground.isGround$NN = function (x, y) {
 };
 
 var Ground$isGround$NN = Ground.isGround$NN;
-
-/**
- * class Key extends Object
- * @constructor
- */
-function Key() {
-}
-
-Key.prototype = new Object;
-/**
- * @constructor
- */
-function Key$() {
-};
-
-Key$.prototype = new Key;
 
 /**
  * class Obj * @constructor
@@ -326,230 +550,6 @@ Pc.prototype.tick$ = function () {
 };
 
 /**
- * class Game extends Object
- * @constructor
- */
-function Game() {
-}
-
-Game.prototype = new Object;
-/**
- * @constructor
- * @param {HTMLCanvasElement} canvas
- */
-function Game$LHTMLCanvasElement$(canvas) {
-	var $this = this;
-	/** @type {HTMLElement} */
-	var body;
-	this.pc = null;
-	this.enemies = null;
-	this.isEnd = false;
-	canvas.width = (Config.canvasWidth | 0);
-	canvas.height = (Config.canvasHeight | 0);
-	this.ctx = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
-	if (! (this.ctx != null)) {
-		debugger;
-		throw new Error("[test.jsx:217] assertion failure");
-	}
-	this.ctx.font = Config.font;
-	this.pc = new Pc$NN(Config.defaultX, Config.defaultY);
-	this.enemies = [ new Enemy$NNN(80, 120, 1), new Enemy$NNN(80, 150, 1) ];
-	body = dom.window.document.body;
-	body.addEventListener("keydown", (function (e) {
-		/** @type {KeyboardEvent} */
-		var ke;
-		if (e instanceof KeyboardEvent) {
-			ke = (function (o) { return o instanceof KeyboardEvent ? o : null; })(e);
-			switch (ke.keyCode) {
-			case Key.up_code:
-				Key.up = true;
-				break;
-			case Key.right_code:
-				Key.right = true;
-				break;
-			case Key.down_code:
-				Key.down = true;
-				break;
-			case Key.left_code:
-				Key.left = true;
-				break;
-			}
-		}
-	}));
-	body.addEventListener("keyup", (function (e) {
-		/** @type {KeyboardEvent} */
-		var ke;
-		if (e instanceof KeyboardEvent) {
-			ke = (function (o) { return o instanceof KeyboardEvent ? o : null; })(e);
-			switch (ke.keyCode) {
-			case Key.up_code:
-				Key.up = false;
-				break;
-			case Key.right_code:
-				Key.right = false;
-				break;
-			case Key.down_code:
-				Key.down = false;
-				break;
-			case Key.left_code:
-				Key.left = false;
-				break;
-			}
-		}
-	}));
-};
-
-Game$LHTMLCanvasElement$.prototype = new Game;
-
-/**
- */
-Game.prototype.tick$ = function () {
-	var $this = this;
-	/** @type {!number} */
-	var i;
-	if (this.isEnd) {
-		return;
-	}
-	dom.window.setTimeout((function () {
-		$this.tick$();
-	}), 1000 / Config.fps);
-	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
-	Ground$draw$LCanvasRenderingContext2D$(this.ctx);
-	if (Key.right) {
-		this.pc.move$N(1);
-	}
-	if (Key.left) {
-		this.pc.move$N(- 1);
-	}
-	if (Key.up) {
-		this.pc.jump$N(4.5);
-	}
-	this.pc.tick$();
-	if (this.pc.y - Config.objHeight * 1.5 > 0) {
-		this.pc.draw$LCanvasRenderingContext2D$(this.ctx);
-	} else {
-		this.gameEnd$S(Config.goalMessage);
-		return;
-	}
-	for (i = 0; i < this.enemies.length; ++ i) {
-		this.enemies[i].tick$();
-		this.enemies[i].draw$LCanvasRenderingContext2D$(this.ctx);
-		if (this.pc.hit$LObj$((function (v) {
-			if (! (typeof v !== "undefined")) {
-				debugger;
-				throw new Error("[test.jsx:276] detected misuse of 'undefined' as type 'Enemy'");
-			}
-			return v;
-		}(this.enemies[i])))) {
-			this.gameEnd$S(Config.deadMessage);
-			return;
-		}
-	}
-};
-
-/**
- * @param {!string} msg
- */
-Game.prototype.gameEnd$S = function (msg) {
-	this.isEnd = true;
-	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
-	this.ctx.fillText(msg, Config.messageX, Config.messageY);
-};
-
-/**
- * class _Main extends Object
- * @constructor
- */
-function _Main() {
-}
-
-_Main.prototype = new Object;
-/**
- * @constructor
- */
-function _Main$() {
-};
-
-_Main$.prototype = new _Main;
-
-/**
- * @param {Array.<undefined|!string>} args
- */
-_Main.main$AS = function (args) {
-	/** @type {HTMLCanvasElement} */
-	var canvas;
-	/** @type {Game} */
-	var game;
-	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
-		if (! (typeof v !== "undefined")) {
-			debugger;
-			throw new Error("[test.jsx:289] detected misuse of 'undefined' as type 'string'");
-		}
-		return v;
-	}(args[0]))));
-	if (! (canvas != null)) {
-		debugger;
-		throw new Error("[test.jsx:290] assertion failure");
-	}
-	game = new Game$LHTMLCanvasElement$(canvas);
-	game.tick$();
-};
-
-var _Main$main$AS = _Main.main$AS;
-
-/**
- * class dom extends Object
- * @constructor
- */
-function dom() {
-}
-
-dom.prototype = new Object;
-/**
- * @constructor
- */
-function dom$() {
-};
-
-dom$.prototype = new dom;
-
-/**
- * @param {!string} id
- * @return {HTMLElement}
- */
-dom.id$S = function (id) {
-	return (function (o) { return o instanceof HTMLElement ? o : null; })(dom.window.document.getElementById(id));
-};
-
-var dom$id$S = dom.id$S;
-
-/**
- * @param {!string} id
- * @return {HTMLElement}
- */
-dom.getElementById$S = function (id) {
-	return (function (o) { return o instanceof HTMLElement ? o : null; })(dom.window.document.getElementById(id));
-};
-
-var dom$getElementById$S = dom.getElementById$S;
-
-/**
- * @param {!string} tag
- * @return {HTMLElement}
- */
-dom.createElement$S = function (tag) {
-	return (function (v) {
-		if (! (v === null || v instanceof HTMLElement)) {
-			debugger;
-			throw new Error("[/home/napthats/Downloads/JSX/lib/js/js/web.jsx:30] detected invalid cast, value is not an instance of the designated type or null");
-		}
-		return v;
-	}(dom.window.document.createElement(tag)));
-};
-
-var dom$createElement$S = dom.createElement$S;
-
-/**
  * class js extends Object
  * @constructor
  */
@@ -565,6 +565,17 @@ function js$() {
 
 js$.prototype = new js;
 
+Key.up_code = 38;
+Key.right_code = 39;
+Key.down_code = 40;
+Key.left_code = 37;
+Key.up = false;
+Key.right = false;
+Key.down = false;
+Key.left = false;
+$__jsx_lazy_init(dom, "window", function () {
+	return js.global.window;
+});
 Config.objWidth = 8;
 Config.objHeight = 8;
 Config.canvasWidth = 160;
@@ -580,34 +591,13 @@ Config.deadMessage = "Game Over";
 $__jsx_lazy_init(Ground, "map", function () {
 	return [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=                  =", "=                  =", "=                  =", "=                  =", "==   ===============", "=                  =", "=                  =", "====================" ];
 });
-Key.up_code = 38;
-Key.right_code = 39;
-Key.down_code = 40;
-Key.left_code = 37;
-Key.up = false;
-Key.right = false;
-Key.down = false;
-Key.left = false;
 Pc.max_dx = 2;
-$__jsx_lazy_init(dom, "window", function () {
-	return js.global.window;
-});
 js.global = (function () { return this; })();
 
 var $__jsx_classMap = {
 	"test.jsx": {
-		Config: Config,
-		Config$: Config$,
-		Ground: Ground,
-		Ground$: Ground$,
 		Key: Key,
 		Key$: Key$,
-		Obj: Obj,
-		Obj$: Obj$,
-		Enemy: Enemy,
-		Enemy$NNN: Enemy$NNN,
-		Pc: Pc,
-		Pc$NN: Pc$NN,
 		Game: Game,
 		Game$LHTMLCanvasElement$: Game$LHTMLCanvasElement$,
 		_Main: _Main,
@@ -616,6 +606,22 @@ var $__jsx_classMap = {
 	"system:lib/js/js/web.jsx": {
 		dom: dom,
 		dom$: dom$
+	},
+	"config.jsx": {
+		Config: Config,
+		Config$: Config$
+	},
+	"ground.jsx": {
+		Ground: Ground,
+		Ground$: Ground$
+	},
+	"obj.jsx": {
+		Obj: Obj,
+		Obj$: Obj$,
+		Enemy: Enemy,
+		Enemy$NNN: Enemy$NNN,
+		Pc: Pc,
+		Pc$NN: Pc$NN
 	},
 	"system:lib/js/js.jsx": {
 		js: js,
