@@ -1,6 +1,6 @@
 import 'js/web.jsx';
 import 'config.jsx';
-import 'ground.jsx';
+import 'stage.jsx';
 
 
 mixin Obj {
@@ -16,8 +16,13 @@ mixin Obj {
     }
 
     function hitGround(dx : number, dy : number) : boolean {
-        return Ground.isGround(this.x + dx, this.y + dy);
+        return Stage.isGround(this.x + dx, this.y + dy);
     }    
+
+    function isOuter() : boolean {
+        if (Stage.checkInner(this.x, this.y) instanceof Outer) return true;
+        else return false;
+    }
 
     function draw(context : CanvasRenderingContext2D) : void {
         context.fillText(
@@ -81,7 +86,8 @@ abstract class WalkingObj implements Obj {
     }
 
     override function tick() : void {
-        if (this.dy >= 0 && this.hitGround(0, 1)) {this.dy = 0; this.onGround = true;}
+        if (this.isOuter()) return;
+        else if (this.dy >= 0 && this.hitGround(0, 1)) {this.dy = 0; this.onGround = true;}
         else {
             this.dy += 0.2;
             this.onGround = false;
@@ -102,10 +108,10 @@ final class WalkingEnemy extends WalkingObj implements Enemy {
     }
 
     override function tick() : void {
-        super.tick();
         if (this.onGround && !this.hitGround(this.dx, 0) && this.hitGround(this.dx, 1))
             this.x += this.dx;
         else this.dx = -this.dx;
+        super.tick();
     }
 }
 
@@ -125,11 +131,11 @@ final class Pc extends WalkingObj {
     }
 
     override function tick() : void {
-        super.tick();
         if (Math.abs(this.dx) >= 0.1) {this.dx -= 0.05 * (Math.abs(this.dx) / this.dx);}
         else {this.dx = 0;}
 
         if (this.hitGround(this.dx, 0)) this.dx = 0;
         else this.x += this.dx;
+        super.tick();
     }
 }

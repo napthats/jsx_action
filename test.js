@@ -80,31 +80,22 @@ Game.prototype = new Object;
  */
 function Game$LHTMLCanvasElement$(canvas) {
 	var $this = this;
-	var delta_func;
 	/** @type {HTMLElement} */
 	var body;
 	this.pc = null;
 	this.enemies = null;
 	this.isEnd = false;
+	this.stage_number = 0;
 	canvas.width = (Config.canvasWidth | 0);
 	canvas.height = (Config.canvasHeight | 0);
 	this.ctx = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
 	if (! (this.ctx != null)) {
 		debugger;
-		throw new Error("[test.jsx:35] assertion failure");
+		throw new Error("[test.jsx:37] assertion failure");
 	}
 	this.ctx.font = Config.font;
 	this.pc = new Pc$NN(Config.defaultX, Config.defaultY);
-	delta_func = (function (tick_count) {
-		/** @type {!number} */
-		var dx;
-		/** @type {!number} */
-		var dy;
-		dx = Math.sin(tick_count / Config.fps * 3.14);
-		dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
-		return { "dx": dx, "dy": dy };
-	});
-	this.enemies = [ new WalkingEnemy$NNN(80, 120, 1), new WalkingEnemy$NNN(80, 150, 1), new FlyingEnemy$NNF$NHN$(70, 40, delta_func) ];
+	this.enemies = Stage$getEnemies$();
 	body = dom.window.document.body;
 	body.addEventListener("keydown", (function (e) {
 		/** @type {KeyboardEvent} */
@@ -162,6 +153,10 @@ Game$LHTMLCanvasElement$.prototype = new Game;
  */
 Game.prototype.tick$ = function () {
 	var $this = this;
+	/** @type {Region} */
+	var inout;
+	/** @type {Outer} */
+	var out;
 	/** @type {!number} */
 	var i;
 	if (this.isEnd) {
@@ -171,7 +166,7 @@ Game.prototype.tick$ = function () {
 		$this.tick$();
 	}), 1000 / Config.fps);
 	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
-	Ground$draw$LCanvasRenderingContext2D$(this.ctx);
+	Stage$draw$LCanvasRenderingContext2D$(this.ctx);
 	if (Key.right) {
 		this.pc.move$N(1);
 	}
@@ -182,11 +177,51 @@ Game.prototype.tick$ = function () {
 		this.pc.jump$N(4.5);
 	}
 	this.pc.tick$();
-	if (this.pc.y - Config.objHeight * 1.5 > 0) {
+	inout = Stage$checkInner$NN(this.pc.x, this.pc.y);
+	if (inout instanceof Inner) {
 		this.pc.draw$LCanvasRenderingContext2D$(this.ctx);
 	} else {
-		this.gameEnd$S(Config.goalMessage);
-		return;
+		if (inout instanceof Outer) {
+			out = (function (o) { return o instanceof Outer ? o : null; })(inout);
+			if (out.direction instanceof Up && Stage.stage_number === 1) {
+				this.gameEnd$S(Config.goalMessage);
+				return;
+			} else {
+				if (out.direction instanceof Up && Stage.stage_number === 0) {
+					Stage$changeStage$N(1);
+					this.enemies = Stage$getEnemies$();
+					this.pc.y = Config.canvasHeight - Config.objHeight;
+				} else {
+					if (out.direction instanceof Down && Stage.stage_number === 1) {
+						Stage$changeStage$N(0);
+						this.enemies = Stage$getEnemies$();
+						this.pc.y = 0 + Config.objHeight;
+					} else {
+						if (out.direction instanceof Left && Stage.stage_number === 0) {
+							Stage$changeStage$N(2);
+							this.enemies = Stage$getEnemies$();
+							this.pc.x = Config.canvasWidth - Config.objWidth;
+						} else {
+							if (out.direction instanceof Right && Stage.stage_number === 2) {
+								Stage$changeStage$N(0);
+								this.enemies = Stage$getEnemies$();
+								this.pc.x = 0 + Config.objWidth / 2;
+							} else {
+								if (! (false)) {
+									debugger;
+									throw new Error("[test.jsx:120] assertion failure");
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			if (! (false)) {
+				debugger;
+				throw new Error("[test.jsx:122] assertion failure");
+			}
+		}
 	}
 	for (i = 0; i < this.enemies.length; ++ i) {
 		this.enemies[i].tick$();
@@ -194,7 +229,7 @@ Game.prototype.tick$ = function () {
 		if (this.pc.hit$LObj$((function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[test.jsx:104] detected misuse of 'undefined' as type 'Enemy'");
+				throw new Error("[test.jsx:128] detected misuse of 'undefined' as type 'Enemy'");
 			}
 			return v;
 		}(this.enemies[i])))) {
@@ -240,13 +275,13 @@ _Main.main$AS = function (args) {
 	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[test.jsx:117] detected misuse of 'undefined' as type 'string'");
+			throw new Error("[test.jsx:141] detected misuse of 'undefined' as type 'string'");
 		}
 		return v;
 	}(args[0]))));
 	if (! (canvas != null)) {
 		debugger;
-		throw new Error("[test.jsx:118] assertion failure");
+		throw new Error("[test.jsx:142] assertion failure");
 	}
 	game = new Game$LHTMLCanvasElement$(canvas);
 	game.tick$();
@@ -323,25 +358,195 @@ function Config$() {
 Config$.prototype = new Config;
 
 /**
- * class Ground extends Object
- * @constructor
+ * class Direction * @constructor
  */
-function Ground() {
+function Direction() {
 }
 
-Ground.prototype = new Object;
+Direction.prototype.$__jsx_implements_Direction = true;
+
 /**
  * @constructor
  */
-function Ground$() {
+function Direction$() {
 };
 
-Ground$.prototype = new Ground;
+Direction$.prototype = new Direction;
+
+/**
+ * class Up extends Object
+ * @constructor
+ */
+function Up() {
+}
+
+Up.prototype = new Object;
+$__jsx_merge_interface(Up, Direction);
+
+/**
+ * @constructor
+ */
+function Up$() {
+	Direction$.call(this);
+};
+
+Up$.prototype = new Up;
+
+/**
+ * class Right extends Object
+ * @constructor
+ */
+function Right() {
+}
+
+Right.prototype = new Object;
+$__jsx_merge_interface(Right, Direction);
+
+/**
+ * @constructor
+ */
+function Right$() {
+	Direction$.call(this);
+};
+
+Right$.prototype = new Right;
+
+/**
+ * class Down extends Object
+ * @constructor
+ */
+function Down() {
+}
+
+Down.prototype = new Object;
+$__jsx_merge_interface(Down, Direction);
+
+/**
+ * @constructor
+ */
+function Down$() {
+	Direction$.call(this);
+};
+
+Down$.prototype = new Down;
+
+/**
+ * class Left extends Object
+ * @constructor
+ */
+function Left() {
+}
+
+Left.prototype = new Object;
+$__jsx_merge_interface(Left, Direction);
+
+/**
+ * @constructor
+ */
+function Left$() {
+	Direction$.call(this);
+};
+
+Left$.prototype = new Left;
+
+/**
+ * class Region * @constructor
+ */
+function Region() {
+}
+
+Region.prototype.$__jsx_implements_Region = true;
+
+/**
+ * @constructor
+ */
+function Region$() {
+};
+
+Region$.prototype = new Region;
+
+/**
+ * class Outer extends Object
+ * @constructor
+ */
+function Outer() {
+}
+
+Outer.prototype = new Object;
+$__jsx_merge_interface(Outer, Region);
+
+/**
+ * @constructor
+ * @param {Direction} d
+ */
+function Outer$LDirection$(d) {
+	Region$.call(this);
+	this.direction = d;
+};
+
+Outer$LDirection$.prototype = new Outer;
+
+/**
+ * class Inner extends Object
+ * @constructor
+ */
+function Inner() {
+}
+
+Inner.prototype = new Object;
+$__jsx_merge_interface(Inner, Region);
+
+/**
+ * @constructor
+ */
+function Inner$() {
+	Region$.call(this);
+};
+
+Inner$.prototype = new Inner;
+
+/**
+ * class Stage extends Object
+ * @constructor
+ */
+function Stage() {
+}
+
+Stage.prototype = new Object;
+/**
+ * @constructor
+ */
+function Stage$() {
+};
+
+Stage$.prototype = new Stage;
+
+/**
+ * @return {Array.<undefined|Enemy>}
+ */
+Stage.getEnemies$ = function () {
+	return Stage.enemies[Stage.stage_number];
+};
+
+var Stage$getEnemies$ = Stage.getEnemies$;
+
+/**
+ * @param {!number} _stage_number
+ */
+Stage.changeStage$N = function (_stage_number) {
+	if (! (_stage_number === 0 || _stage_number === 1 || _stage_number === 2)) {
+		debugger;
+		throw new Error("[stage.jsx:145] assertion failure");
+	}
+	Stage.stage_number = _stage_number;
+};
+
+var Stage$changeStage$N = Stage.changeStage$N;
 
 /**
  * @param {CanvasRenderingContext2D} context
  */
-Ground.draw$LCanvasRenderingContext2D$ = function (context) {
+Stage.draw$LCanvasRenderingContext2D$ = function (context) {
 	/** @type {!number} */
 	var y_ord;
 	/** @type {!number} */
@@ -353,25 +558,64 @@ Ground.draw$LCanvasRenderingContext2D$ = function (context) {
 	/** @type {!number} */
 	var i;
 	y_ord = 1;
-	for (key in Ground.map) {
-		str = Ground.map[key];
+	for (key in Stage.map[Stage.stage_number]) {
+		str = Stage.map[Stage.stage_number][key];
 		x_ord = 0;
 		for (i = 0; i < str.length; ++ i) {
-			context.fillText(Ground.map[key].charAt(i), Config.objWidth * x_ord, Config.objHeight * y_ord);
+			context.fillText(Stage.map[Stage.stage_number][key].charAt(i), Config.objWidth * x_ord, Config.objHeight * y_ord);
 			x_ord += 1;
 		}
 		y_ord += 1;
 	}
 };
 
-var Ground$draw$LCanvasRenderingContext2D$ = Ground.draw$LCanvasRenderingContext2D$;
+var Stage$draw$LCanvasRenderingContext2D$ = Stage.draw$LCanvasRenderingContext2D$;
+
+/**
+ * @param {!number} x
+ * @param {!number} y
+ * @return {Region}
+ */
+Stage.checkInner$NN = function (x, y) {
+	/** @type {!number} */
+	var ord_x_l;
+	/** @type {!number} */
+	var ord_x_r;
+	/** @type {!number} */
+	var ord_y_d;
+	/** @type {!number} */
+	var ord_y_t;
+	ord_x_l = Math.floor(x / Config.objWidth);
+	ord_x_r = Math.floor(x / Config.objWidth) + 1;
+	ord_y_d = Math.floor(y / Config.objHeight);
+	ord_y_t = Math.floor(y / Config.objHeight) - 1;
+	if (ord_x_l + 0.5 < 0) {
+		return new Outer$LDirection$(new Left$());
+	} else {
+		if (ord_x_r - 0.5 >= 20) {
+			return new Outer$LDirection$(new Right$());
+		} else {
+			if (ord_y_d - 0.5 >= 30) {
+				return new Outer$LDirection$(new Down$());
+			} else {
+				if (ord_y_t + 0.5 < 0) {
+					return new Outer$LDirection$(new Up$());
+				} else {
+					return new Inner$();
+				}
+			}
+		}
+	}
+};
+
+var Stage$checkInner$NN = Stage.checkInner$NN;
 
 /**
  * @param {!number} x
  * @param {!number} y
  * @return {!boolean}
  */
-Ground.isGround$NN = function (x, y) {
+Stage.isGround$NN = function (x, y) {
 	/** @type {!number} */
 	var ord_x_l;
 	/** @type {!number} */
@@ -385,16 +629,16 @@ Ground.isGround$NN = function (x, y) {
 	ord_y_d = Math.floor(y / Config.objHeight);
 	ord_y_t = Math.floor(y / Config.objHeight) - 1;
 	if (ord_x_l < 0 || ord_x_r >= 20 || ord_y_d >= 30 || ord_y_t < 0) {
-		return true;
+		return false;
 	}
-	if (Ground.map[ord_y_d].charAt(ord_x_l) === ' ' && Ground.map[ord_y_d].charAt(ord_x_r) === ' ' && Ground.map[ord_y_t].charAt(ord_x_l) === ' ' && Ground.map[ord_y_t].charAt(ord_x_r) === ' ') {
+	if (Stage.map[Stage.stage_number][ord_y_d].charAt(ord_x_l) === ' ' && Stage.map[Stage.stage_number][ord_y_d].charAt(ord_x_r) === ' ' && Stage.map[Stage.stage_number][ord_y_t].charAt(ord_x_l) === ' ' && Stage.map[Stage.stage_number][ord_y_t].charAt(ord_x_r) === ' ') {
 		return false;
 	} else {
 		return true;
 	}
 };
 
-var Ground$isGround$NN = Ground.isGround$NN;
+var Stage$isGround$NN = Stage.isGround$NN;
 
 /**
  * class Obj * @constructor
@@ -427,7 +671,18 @@ Obj.prototype.hit$LObj$ = function (other) {
  * @return {!boolean}
  */
 Obj.prototype.hitGround$NN = function (dx, dy) {
-	return Ground$isGround$NN(this.x + dx, this.y + dy);
+	return Stage$isGround$NN(this.x + dx, this.y + dy);
+};
+
+/**
+ * @return {!boolean}
+ */
+Obj.prototype.isOuter$ = function () {
+	if (Stage$checkInner$NN(this.x, this.y) instanceof Outer) {
+		return true;
+	} else {
+		return false;
+	}
 };
 
 /**
@@ -492,36 +747,36 @@ FlyingEnemy.prototype.tick$ = function () {
 	delta = this.get_delta(this.tick_count);
 	if (! (delta.dx !== undefined)) {
 		debugger;
-		throw new Error("[obj.jsx:54] assertion failure");
+		throw new Error("[obj.jsx:59] assertion failure");
 	}
 	if (! (delta.dy !== undefined)) {
 		debugger;
-		throw new Error("[obj.jsx:55] assertion failure");
+		throw new Error("[obj.jsx:60] assertion failure");
 	}
 	if (! this.hitGround$NN((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[obj.jsx:57] detected misuse of 'undefined' as type 'number'");
+			throw new Error("[obj.jsx:62] detected misuse of 'undefined' as type 'number'");
 		}
 		return v;
 	}(delta.dx)), (function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[obj.jsx:57] detected misuse of 'undefined' as type 'number'");
+			throw new Error("[obj.jsx:62] detected misuse of 'undefined' as type 'number'");
 		}
 		return v;
 	}(delta.dy)))) {
 		this.x += (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[obj.jsx:58] detected misuse of 'undefined' as type 'number'");
+				throw new Error("[obj.jsx:63] detected misuse of 'undefined' as type 'number'");
 			}
 			return v;
 		}(delta.dx));
 		this.y += (function (v) {
 			if (! (typeof v !== "undefined")) {
 				debugger;
-				throw new Error("[obj.jsx:59] detected misuse of 'undefined' as type 'number'");
+				throw new Error("[obj.jsx:64] detected misuse of 'undefined' as type 'number'");
 			}
 			return v;
 		}(delta.dy));
@@ -560,19 +815,23 @@ WalkingObj$NNS.prototype = new WalkingObj;
 /**
  */
 WalkingObj.prototype.tick$ = function () {
-	if (this.dy >= 0 && this.hitGround$NN(0, 1)) {
-		this.dy = 0;
-		this.onGround = true;
+	if (this.isOuter$()) {
+		return;
 	} else {
-		this.dy += 0.2;
-		this.onGround = false;
-		if (this.dy <= 0 && this.hitGround$NN(0, - 1)) {
+		if (this.dy >= 0 && this.hitGround$NN(0, 1)) {
 			this.dy = 0;
+			this.onGround = true;
 		} else {
-			if (this.hitGround$NN(0, this.dy)) {
-				this.y += 1;
+			this.dy += 0.2;
+			this.onGround = false;
+			if (this.dy <= 0 && this.hitGround$NN(0, - 1)) {
+				this.dy = 0;
 			} else {
-				this.y += this.dy;
+				if (this.hitGround$NN(0, this.dy)) {
+					this.y += 1;
+				} else {
+					this.y += this.dy;
+				}
 			}
 		}
 	}
@@ -605,12 +864,12 @@ WalkingEnemy$NNN.prototype = new WalkingEnemy;
 /**
  */
 WalkingEnemy.prototype.tick$ = function () {
-	WalkingObj.prototype.tick$.call(this);
 	if (this.onGround && ! this.hitGround$NN(this.dx, 0) && this.hitGround$NN(this.dx, 1)) {
 		this.x += this.dx;
 	} else {
 		this.dx = - this.dx;
 	}
+	WalkingObj.prototype.tick$.call(this);
 };
 
 /**
@@ -655,7 +914,6 @@ Pc.prototype.jump$N = function (pow) {
  */
 Pc.prototype.tick$ = function () {
 	var $math_abs_t;
-	WalkingObj.prototype.tick$.call(this);
 	if ((($math_abs_t = this.dx) >= 0 ? $math_abs_t : -$math_abs_t) >= 0.1) {
 		this.dx -= 0.05 * ((($math_abs_t = this.dx) >= 0 ? $math_abs_t : -$math_abs_t) / this.dx);
 	} else {
@@ -666,6 +924,7 @@ Pc.prototype.tick$ = function () {
 	} else {
 		this.x += this.dx;
 	}
+	WalkingObj.prototype.tick$.call(this);
 };
 
 /**
@@ -709,8 +968,12 @@ Config.messageX = 40;
 Config.messageY = 120;
 Config.goalMessage = "Congratulation!";
 Config.deadMessage = "Game Over";
-$__jsx_lazy_init(Ground, "map", function () {
-	return [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=                  =", "=                  =", "=                  =", "=                  =", "==   ===============", "=                  =", "=                  =", "====================" ];
+Stage.stage_number = 0;
+$__jsx_lazy_init(Stage, "enemies", function () {
+	return [ [ new WalkingEnemy$NNN(0, 0, 0) ], [ new WalkingEnemy$NNN(10, 40, 1) ], [ new WalkingEnemy$NNN(0, 0, 0) ] ];
+});
+$__jsx_lazy_init(Stage, "map", function () {
+	return [ [ "============       =", "=      =           =", "       =           =", "       =     ===   =", "=                  =", "=   ====           =", "=   ====           =", "=              =   =", "=              =   =", "=              =   =", "=        =======   =", "=  =               =", "=                  =", "=   ==             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         ====     =", "=                  =", "=                  =", "=                  =", "=   ================", "=                  =", "=                  =", "====================" ], [ "===    =============", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "=                  =", "=                  =", "=              =   =", "=                  =", "=                  =", "=                  =", "======             =", "=                  =", "=                  =", "=        ====      =", "=                  =", "=                  =", "=                  =", "=                  =", "==============   ===", "=         =        =", "=         =        =", "=   ====     =     =", "=      =     =     =", "=      =======     =", "=                  =", "=                  =", "============       =" ], [ "====================", "=                  =", "=                   ", "=                   ", "=                  =", "=             =    =", "=                  =", "=                  =", "=                  =", "=                  =", "=        =         =", "=  =               =", "=                  =", "=    ===============", "=                  =", "=                  =", "= = = = = = = = =  =", "=     =   =   =    =", "=                  =", "=                  =", "=   ================", "=    =             =", "=         =        =", "=                  =", "=                  =", "=                  =", "=      =           =", "=                  =", "=                  =", "====================" ] ];
 });
 Pc.max_dx = 2;
 js.global = (function () { return this; })();
@@ -732,9 +995,25 @@ var $__jsx_classMap = {
 		Config: Config,
 		Config$: Config$
 	},
-	"ground.jsx": {
-		Ground: Ground,
-		Ground$: Ground$
+	"stage.jsx": {
+		Direction: Direction,
+		Direction$: Direction$,
+		Up: Up,
+		Up$: Up$,
+		Right: Right,
+		Right$: Right$,
+		Down: Down,
+		Down$: Down$,
+		Left: Left,
+		Left$: Left$,
+		Region: Region,
+		Region$: Region$,
+		Outer: Outer,
+		Outer$LDirection$: Outer$LDirection$,
+		Inner: Inner,
+		Inner$: Inner$,
+		Stage: Stage,
+		Stage$: Stage$
 	},
 	"obj.jsx": {
 		Obj: Obj,

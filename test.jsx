@@ -1,6 +1,6 @@
 import 'js/web.jsx';
 import 'config.jsx';
-import 'ground.jsx';
+import 'stage.jsx';
 import 'obj.jsx';
 
 final class Key {
@@ -25,9 +25,11 @@ final class Game {
     var enemies : Array.<Enemy>;
     var ctx : CanvasRenderingContext2D;
     var isEnd : boolean;
+    var stage_number : number;
 
     function constructor(canvas : HTMLCanvasElement) {
         this.isEnd = false;
+        this.stage_number = 0;
 
         canvas.width = Config.canvasWidth;
         canvas.height = Config.canvasHeight;
@@ -37,15 +39,7 @@ final class Game {
 
         this.pc = new Pc(Config.defaultX, Config.defaultY);
 
-        var delta_func = function(tick_count : number) : Map.<number> {
-            var dx = Math.sin(tick_count / Config.fps * 3.14);
-            var dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
-            return {"dx": dx, "dy": dy};
-        };
-        this.enemies = [
-            new WalkingEnemy(80, 120, 1) as Enemy,
-            new WalkingEnemy(80, 150, 1) as Enemy,
-            new FlyingEnemy(70, 40, delta_func) as Enemy];
+        this.enemies = Stage.getEnemies();
 
         var body = dom.window.document.body;
         body.addEventListener(
@@ -87,15 +81,45 @@ final class Game {
 
         this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
   
-        Ground.draw(this.ctx);
+        Stage.draw(this.ctx);
       
         if (Key.right) this.pc.move(1);
         if (Key.left) this.pc.move(-1);
         if (Key.up || Key.z) this.pc.jump(4.5);
 
         this.pc.tick();
-        if (this.pc.y - Config.objHeight * 1.5 > 0) this.pc.draw(this.ctx);
-        else {this.gameEnd(Config.goalMessage); return;}
+
+        var inout = Stage.checkInner(this.pc.x, this.pc.y);
+        if (inout instanceof Inner) this.pc.draw(this.ctx);
+        else if (inout instanceof Outer) {
+            var out = inout as Outer;
+            if (out.direction instanceof Up && Stage.stage_number == 1) {
+                this.gameEnd(Config.goalMessage);
+                return;
+            }
+            else if (out.direction instanceof Up && Stage.stage_number == 0) {
+                Stage.changeStage(1);
+                this.enemies = Stage.getEnemies();
+                this.pc.y = Config.canvasHeight - Config.objHeight;
+            }
+            else if (out.direction instanceof Down && Stage.stage_number == 1) {
+                Stage.changeStage(0);
+                this.enemies = Stage.getEnemies();
+                this.pc.y = 0 + Config.objHeight;
+            }            
+            else if (out.direction instanceof Left && Stage.stage_number == 0) {
+                Stage.changeStage(2);
+                this.enemies = Stage.getEnemies();
+                this.pc.x = Config.canvasWidth - Config.objWidth;
+            }
+            else if (out.direction instanceof Right && Stage.stage_number == 2) {
+                Stage.changeStage(0);
+                this.enemies = Stage.getEnemies();
+                this.pc.x = 0 + Config.objWidth/2;
+            }            
+            else assert(false);
+        }
+        else assert(false);
 
         for (var i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].tick();
