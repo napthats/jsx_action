@@ -103,8 +103,8 @@ class FlyingEnemy implements Obj, Enemy {
 
     override function tick() : void {
         var delta = this.get_delta(this.tick_count);
-        assert(delta["dx"] != undefined);
-        assert(delta["dy"] != undefined);
+        assert(delta["dx"] != null);
+        assert(delta["dy"] != null);
 
         if (!this.hitGround(delta["dx"], delta["dy"])) {
             this.x += delta["dx"];

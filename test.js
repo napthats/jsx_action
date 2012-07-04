@@ -32,16 +32,35 @@ function $__jsx_lazy_init(obj, prop, func) {
 	});
 }
 
+/**
+ * sideeffect().a /= b
+ */
+function $__jsx_div_assign(obj, prop, divisor) {
+	return obj[prop] = (obj[prop] / divisor) | 0;
+}
+
 /*
- * global functions called by JSX as Number.* (renamed so that they do not conflict with local variable names)
+ * global functions called by JSX
+ * (enamed so that they do not conflict with local variable names)
  */
 var $__jsx_parseInt = parseInt;
 var $__jsx_parseFloat = parseFloat;
 var $__jsx_isNaN = isNaN;
 var $__jsx_isFinite = isFinite;
 
+var $__jsx_encodeURIComponent = encodeURIComponent;
+var $__jsx_decodeURIComponent = decodeURIComponent;
+var $__jsx_encodeURI = encodeURI;
+var $__jsx_decodeURI = decodeURI;
+
 var $__jsx_ObjectToString = Object.prototype.toString;
 var $__jsx_ObjectHasOwnProperty = Object.prototype.hasOwnProperty;
+
+/*
+ * profiler object, initialized afterwards
+ */
+function $__jsx_profiler() {
+}
 
 /*
  * public interface to JSX code
@@ -49,7 +68,21 @@ var $__jsx_ObjectHasOwnProperty = Object.prototype.hasOwnProperty;
 JSX.require = function (path) {
 	var m = $__jsx_classMap[path];
 	return m !== undefined ? m : null;
-}
+};
+
+JSX.profilerIsRunning = function () {
+	return $__jsx_profiler.getResults != null;
+};
+
+JSX.getProfileResults = function () {
+	return ($__jsx_profiler.getResults || function () { return {}; })();
+};
+
+JSX.postProfileResults = function (url) {
+	if ($__jsx_profiler.postResults == null)
+		throw new Error("profiler has not been turned on");
+	return $__jsx_profiler.postResults(url);
+};
 /**
  * class Key extends Object
  * @constructor
@@ -82,23 +115,19 @@ function Game$LHTMLCanvasElement$(canvas) {
 	var $this = this;
 	/** @type {HTMLElement} */
 	var body;
-	this.pc = null;
-	this.enemies = null;
-	this.items = null;
+	this.pc = undefined;
+	this.enemies = undefined;
+	this.items = undefined;
 	this.isEnd = false;
 	this.isStarted = false;
 	this.stage_number = 0;
-	canvas.width = (Config.canvasWidth | 0);
-	canvas.height = (Config.canvasHeight | 0);
+	canvas.width = 160;
+	canvas.height = 240;
 	this.ctx = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
-	if (! (this.ctx != null)) {
-		debugger;
-		throw new Error("[test.jsx:40] assertion failure");
-	}
-	this.ctx.font = Config.font;
-	this.pc = new Pc$NN(Config.defaultX, Config.defaultY);
+	this.ctx.font = "16px serif";
+	this.pc = new Pc$NN(80, 231);
 	this.enemies = Stage$getEnemies$();
-	this.items = Stage$getItems$();
+	this.items = Stage.items[Stage.stage_number];
 	body = dom.window.document.body;
 	body.addEventListener("keydown", (function (e) {
 		/** @type {KeyboardEvent} */
@@ -106,19 +135,19 @@ function Game$LHTMLCanvasElement$(canvas) {
 		if (e instanceof KeyboardEvent) {
 			ke = (function (o) { return o instanceof KeyboardEvent ? o : null; })(e);
 			switch (ke.keyCode) {
-			case Key.up_code:
+			case 38:
 				Key.up = true;
 				break;
-			case Key.right_code:
+			case 39:
 				Key.right = true;
 				break;
-			case Key.left_code:
+			case 37:
 				Key.left = true;
 				break;
-			case Key.z_code:
+			case 90:
 				Key.z = true;
 				break;
-			case Key.x_code:
+			case 88:
 				Key.x = true;
 				break;
 			}
@@ -130,19 +159,19 @@ function Game$LHTMLCanvasElement$(canvas) {
 		if (e instanceof KeyboardEvent) {
 			ke = (function (o) { return o instanceof KeyboardEvent ? o : null; })(e);
 			switch (ke.keyCode) {
-			case Key.up_code:
+			case 38:
 				Key.up = false;
 				break;
-			case Key.right_code:
+			case 39:
 				Key.right = false;
 				break;
-			case Key.left_code:
+			case 37:
 				Key.left = false;
 				break;
-			case Key.z_code:
+			case 90:
 				Key.z = false;
 				break;
-			case Key.x_code:
+			case 88:
 				Key.x = false;
 				break;
 			}
@@ -181,32 +210,48 @@ Game.prototype.tick$ = function () {
 	var senemy;
 	/** @type {Array.<undefined|Enemy>} */
 	var l;
+	/** @type {!number} */
+	var x$0;
+	/** @type {!number} */
+	var y$0;
+	/** @type {!number} */
+	var ord_x_l$0;
+	/** @type {!number} */
+	var ord_x_r$0;
+	/** @type {!number} */
+	var ord_y_d$0;
+	/** @type {!number} */
+	var ord_y_t$0;
+	/** @type {Pc} */
+	var this$0;
+	/** @type {Enemy} */
+	var this$1;
 	if (this.isEnd) {
 		return;
 	}
 	dom.window.setTimeout((function () {
 		$this.tick$();
-	}), 1000 / Config.fps);
+	}), 16.666666666666668);
 	if (! this.isStarted) {
-		this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
-		this.ctx.fillText(Config.startMessage, 0, Config.messageY);
+		this.ctx.clearRect(0, 0, 160, 240);
+		this.ctx.fillText("Normal: z, Hard: x", 0, 120);
 		if (Key.z) {
-			Stage$setDifficulty$N(0);
+			Stage.difficulty = 0;
 			this.isStarted = true;
 		}
 		if (Key.x) {
-			Stage$setDifficulty$N(1);
+			Stage.difficulty = 1;
 			this.isStarted = true;
 		}
 		return;
 	}
-	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
+	this.ctx.clearRect(0, 0, 160, 240);
 	Stage$draw$LCanvasRenderingContext2D$(this.ctx);
 	if (Key.right) {
 		this.pc.move$N(1);
 	}
 	if (Key.left) {
-		this.pc.move$N(- 1);
+		this.pc.move$N(-1);
 	}
 	if (Key.up || Key.z) {
 		this.pc.jump$N(4.5);
@@ -218,110 +263,94 @@ Game.prototype.tick$ = function () {
 		}
 	}
 	this.pc.tick$();
-	inout = Stage$checkInner$NN(this.pc.x, this.pc.y);
+	x$0 = this.pc.x;
+	y$0 = this.pc.y;
+	ord_x_l$0 = Math.floor(x$0 / 8);
+	ord_x_r$0 = Math.floor(x$0 / 8) + 1;
+	ord_y_d$0 = Math.floor(y$0 / 8);
+	ord_y_t$0 = Math.floor(y$0 / 8) - 1;
+	inout = (ord_x_l$0 < 0 ? new Outer$LDirection$(new Left$()) : ord_x_r$0 >= 20 ? new Outer$LDirection$(new Right$()) : ord_y_d$0 >= 30 ? new Outer$LDirection$(new Down$()) : ord_y_t$0 < 0 ? new Outer$LDirection$(new Up$()) : new Inner$());
 	if (inout instanceof Inner) {
 		this.pc.draw$LCanvasRenderingContext2D$(this.ctx);
 	} else {
 		if (inout instanceof Outer) {
 			out = (function (o) { return o instanceof Outer ? o : null; })(inout);
 			if (out.direction instanceof Up && Stage.stage_number === 1) {
-				this.gameEnd$S(Config.goalMessage);
+				this.isEnd = true;
+				this.ctx.clearRect(0, 0, 160, 240);
+				this.ctx.fillText("Congratulation!", 40, 120);
 				return;
 			} else {
 				if (out.direction instanceof Up && Stage.stage_number === 0) {
-					Stage$changeStage$N(1);
+					Stage.stage_number = 1;
 					this.enemies = Stage$getEnemies$();
-					this.items = Stage$getItems$();
-					this.pc.y = Config.canvasHeight - Config.objHeight;
+					this.items = Stage.items[Stage.stage_number];
+					this.pc.y = 232;
 				} else {
 					if (out.direction instanceof Down && Stage.stage_number === 1) {
-						Stage$changeStage$N(0);
+						Stage.stage_number = 0;
 						this.enemies = Stage$getEnemies$();
-						this.items = Stage$getItems$();
-						this.pc.y = 0 + Config.objHeight;
+						this.items = Stage.items[Stage.stage_number];
+						this.pc.y = 8;
 					} else {
 						if (out.direction instanceof Left && Stage.stage_number === 0) {
-							Stage$changeStage$N(2);
+							Stage.stage_number = 2;
 							this.enemies = Stage$getEnemies$();
-							this.items = Stage$getItems$();
-							this.pc.x = Config.canvasWidth - Config.objWidth;
+							this.items = Stage.items[Stage.stage_number];
+							this.pc.x = 152;
 						} else {
 							if (out.direction instanceof Right && Stage.stage_number === 2) {
-								Stage$changeStage$N(0);
+								Stage.stage_number = 0;
 								this.enemies = Stage$getEnemies$();
-								this.items = Stage$getItems$();
-								this.pc.x = 0 + Config.objWidth / 2;
-							} else {
-								if (! (false)) {
-									debugger;
-									throw new Error("[test.jsx:140] assertion failure");
-								}
+								this.items = Stage.items[Stage.stage_number];
+								this.pc.x = 4;
 							}
 						}
 					}
 				}
 			}
-		} else {
-			if (! (false)) {
-				debugger;
-				throw new Error("[test.jsx:142] assertion failure");
-			}
 		}
 	}
 	for (i = 0; i < this.items.length; ++ i) {
 		this.items[i].draw$LCanvasRenderingContext2D$(this.ctx);
-		if (this.pc.hit$LObj$((function (v) {
-			if (! (typeof v !== "undefined")) {
-				debugger;
-				throw new Error("[test.jsx:146] detected misuse of 'undefined' as type 'Item'");
-			}
-			return v;
-		}(this.items[i])))) {
-			this.pc.enableShot$();
+		if (this.pc.hit$LObj$(this.items[i])) {
+			this$0 = this.pc;
+			this$0.can_shot = true;
 			this.items.pop();
 		}
 	}
 	deadCheck = [  ];
 	newEnemies = [  ];
 	for (i = 0; i < this.enemies.length; ++ i) {
-		enemy = (function (v) {
-			if (! (typeof v !== "undefined")) {
-				debugger;
-				throw new Error("[test.jsx:155] detected misuse of 'undefined' as type 'Enemy'");
-			}
-			return v;
-		}(this.enemies[i]));
+		enemy = this.enemies[i];
 		enemy.tick$();
 		enemy.draw$LCanvasRenderingContext2D$(this.ctx);
 		if (enemy instanceof Bullet) {
 			for (j = 0; j < this.enemies.length; ++ j) {
-				aenemy = (function (v) {
-					if (! (typeof v !== "undefined")) {
-						debugger;
-						throw new Error("[test.jsx:162] detected misuse of 'undefined' as type 'Enemy'");
-					}
-					return v;
-				}(this.enemies[j]));
+				aenemy = this.enemies[j];
 				if (i !== j && enemy.hit$LObj$(aenemy)) {
-					enemy.damage$();
+					-- enemy.hp;
 					if (aenemy instanceof MirrorEnemy) {
 						bullet = (function (o) { return o instanceof Bullet ? o : null; })(enemy);
 						menemy = (function (o) { return o instanceof MirrorEnemy ? o : null; })(aenemy);
 						newEnemies.push(menemy.mirror$N(bullet.dx));
 					} else {
-						aenemy.damage$();
+						-- aenemy.hp;
 					}
 				}
 			}
 		}
-		if (this.enemies[i].isDead$()) {
+		this$1 = this.enemies[i];
+		if (this$1.hp <= 0) {
 			deadCheck.push(i);
 		}
 		if (this.pc.hit$LObj$(enemy)) {
-			this.gameEnd$S(Config.deadMessage);
+			this.isEnd = true;
+			this.ctx.clearRect(0, 0, 160, 240);
+			this.ctx.fillText("Game Over", 40, 120);
 			return;
 		}
-		if (enemy instanceof ShotEnemy && (($math_abs_t = this.pc.y - enemy.y) >= 0 ? $math_abs_t : -$math_abs_t) < Config.objHeight) {
+		if (enemy instanceof ShotEnemy && (($math_abs_t = this.pc.y - enemy.y) >= 0 ? $math_abs_t : -$math_abs_t) < 8) {
 			senemy = (function (o) { return o instanceof ShotEnemy ? o : null; })(enemy);
 			bullet = senemy.shot$N((($math_abs_t = this.pc.x - enemy.x) >= 0 ? $math_abs_t : -$math_abs_t) / (this.pc.x - enemy.x));
 			if (bullet) {
@@ -332,26 +361,14 @@ Game.prototype.tick$ = function () {
 	for (i = 0; i < deadCheck.length; ++ i) {
 		l = [  ];
 		for (j = 0; j < this.enemies.length; ++ j) {
-			if (deadCheck[i] !== j) {
-				l.push((function (v) {
-					if (! (typeof v !== "undefined")) {
-						debugger;
-						throw new Error("[test.jsx:188] detected misuse of 'undefined' as type 'Enemy'");
-					}
-					return v;
-				}(this.enemies[j])));
+			if (deadCheck[i] != j) {
+				l.push(this.enemies[j]);
 			}
 		}
 		this.enemies = l;
 	}
 	for (i = 0; i < newEnemies.length; ++ i) {
-		this.enemies.push((function (v) {
-			if (! (typeof v !== "undefined")) {
-				debugger;
-				throw new Error("[test.jsx:193] detected misuse of 'undefined' as type 'Enemy'");
-			}
-			return v;
-		}(newEnemies[i])));
+		this.enemies.push(newEnemies[i]);
 	}
 };
 
@@ -360,8 +377,8 @@ Game.prototype.tick$ = function () {
  */
 Game.prototype.gameEnd$S = function (msg) {
 	this.isEnd = true;
-	this.ctx.clearRect(0, 0, Config.canvasWidth, Config.canvasHeight);
-	this.ctx.fillText(msg, Config.messageX, Config.messageY);
+	this.ctx.clearRect(0, 0, 160, 240);
+	this.ctx.fillText(msg, 40, 120);
 };
 
 /**
@@ -388,17 +405,7 @@ _Main.main$AS = function (args) {
 	var canvas;
 	/** @type {Game} */
 	var game;
-	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S((function (v) {
-		if (! (typeof v !== "undefined")) {
-			debugger;
-			throw new Error("[test.jsx:206] detected misuse of 'undefined' as type 'string'");
-		}
-		return v;
-	}(args[0]))));
-	if (! (canvas != null)) {
-		debugger;
-		throw new Error("[test.jsx:207] assertion failure");
-	}
+	canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$id$S(args[0]));
 	game = new Game$LHTMLCanvasElement$(canvas);
 	game.tick$();
 };
@@ -446,13 +453,7 @@ var dom$getElementById$S = dom.getElementById$S;
  * @return {HTMLElement}
  */
 dom.createElement$S = function (tag) {
-	return (function (v) {
-		if (! (v === null || v instanceof HTMLElement)) {
-			debugger;
-			throw new Error("[/home/napthats/Downloads/JSX/lib/js/js/web.jsx:30] detected invalid cast, value is not an instance of the designated type or null");
-		}
-		return v;
-	}(dom.window.document.createElement(tag)));
+	return dom.window.document.createElement(tag);
 };
 
 var dom$createElement$S = dom.createElement$S;
@@ -474,7 +475,8 @@ function Config$() {
 Config$.prototype = new Config;
 
 /**
- * class Direction * @constructor
+ * class Direction
+ * @constructor
  */
 function Direction() {
 }
@@ -503,7 +505,6 @@ $__jsx_merge_interface(Up, Direction);
  * @constructor
  */
 function Up$() {
-	Direction$.call(this);
 };
 
 Up$.prototype = new Up;
@@ -522,7 +523,6 @@ $__jsx_merge_interface(Right, Direction);
  * @constructor
  */
 function Right$() {
-	Direction$.call(this);
 };
 
 Right$.prototype = new Right;
@@ -541,7 +541,6 @@ $__jsx_merge_interface(Down, Direction);
  * @constructor
  */
 function Down$() {
-	Direction$.call(this);
 };
 
 Down$.prototype = new Down;
@@ -560,13 +559,13 @@ $__jsx_merge_interface(Left, Direction);
  * @constructor
  */
 function Left$() {
-	Direction$.call(this);
 };
 
 Left$.prototype = new Left;
 
 /**
- * class Region * @constructor
+ * class Region
+ * @constructor
  */
 function Region() {
 }
@@ -596,7 +595,6 @@ $__jsx_merge_interface(Outer, Region);
  * @param {Direction} d
  */
 function Outer$LDirection$(d) {
-	Region$.call(this);
 	this.direction = d;
 };
 
@@ -616,7 +614,6 @@ $__jsx_merge_interface(Inner, Region);
  * @constructor
  */
 function Inner$() {
-	Region$.call(this);
 };
 
 Inner$.prototype = new Inner;
@@ -650,23 +647,18 @@ Stage.getEnemies$ = function () {
 				var dx;
 				/** @type {!number} */
 				var dy;
-				dx = Math.sin(tick_count / Config.fps * 3.14);
-				dy = Math.sin(tick_count / Config.fps * 3.14 / 2.2);
+				dx = Math.sin(tick_count / 60 * 3.14);
+				dy = Math.sin(tick_count / 60 * 3.14 / 2.2);
 				return { "dx": dx, "dy": dy };
 			})), new FlyingEnemy$NNF$NHN$(116, 160, (function (tick_count) {
 				/** @type {!number} */
 				var dy;
-				dy = Math.sin(tick_count / Config.fps * 3.14);
+				dy = Math.sin(tick_count / 60 * 3.14);
 				return { "dx": 0, "dy": dy };
 			})) ];
 		} else {
 			if (Stage.stage_number === 2) {
 				return [ new ShotEnemy$NNN(72, 60, 0), new ShotEnemy$NNN(143, 60, 0), new WalkingEnemy$NNN(80, 158, 3), new WalkingEnemy$NNN(100, 100, 3) ];
-			} else {
-				if (! (false)) {
-					debugger;
-					throw new Error("[stage.jsx:257] assertion failure");
-				}
 			}
 		}
 	}
@@ -688,10 +680,6 @@ var Stage$getItems$ = Stage.getItems$;
  * @param {!number} d
  */
 Stage.setDifficulty$N = function (d) {
-	if (! (d === 0 || d === 1)) {
-		debugger;
-		throw new Error("[stage.jsx:266] assertion failure");
-	}
 	Stage.difficulty = d;
 };
 
@@ -701,10 +689,6 @@ var Stage$setDifficulty$N = Stage.setDifficulty$N;
  * @param {!number} _stage_number
  */
 Stage.changeStage$N = function (_stage_number) {
-	if (! (_stage_number === 0 || _stage_number === 1 || _stage_number === 2)) {
-		debugger;
-		throw new Error("[stage.jsx:271] assertion failure");
-	}
 	Stage.stage_number = _stage_number;
 };
 
@@ -729,7 +713,7 @@ Stage.draw$LCanvasRenderingContext2D$ = function (context) {
 		str = Stage.map[Stage.difficulty][Stage.stage_number][key];
 		x_ord = 0;
 		for (i = 0; i < str.length; ++ i) {
-			context.fillText(Stage.map[Stage.difficulty][Stage.stage_number][key].charAt(i), Config.objWidth * x_ord, Config.objHeight * y_ord);
+			context.fillText(Stage.map[Stage.difficulty][Stage.stage_number][key].charAt(i), 8 * x_ord, 8 * y_ord);
 			x_ord += 1;
 		}
 		y_ord += 1;
@@ -752,27 +736,11 @@ Stage.checkInner$NN = function (x, y) {
 	var ord_y_d;
 	/** @type {!number} */
 	var ord_y_t;
-	ord_x_l = Math.floor(x / Config.objWidth);
-	ord_x_r = Math.floor(x / Config.objWidth) + 1;
-	ord_y_d = Math.floor(y / Config.objHeight);
-	ord_y_t = Math.floor(y / Config.objHeight) - 1;
-	if (ord_x_l < 0) {
-		return new Outer$LDirection$(new Left$());
-	} else {
-		if (ord_x_r >= 20) {
-			return new Outer$LDirection$(new Right$());
-		} else {
-			if (ord_y_d >= 30) {
-				return new Outer$LDirection$(new Down$());
-			} else {
-				if (ord_y_t < 0) {
-					return new Outer$LDirection$(new Up$());
-				} else {
-					return new Inner$();
-				}
-			}
-		}
-	}
+	ord_x_l = Math.floor(x / 8);
+	ord_x_r = Math.floor(x / 8) + 1;
+	ord_y_d = Math.floor(y / 8);
+	ord_y_t = Math.floor(y / 8) - 1;
+	return (ord_x_l < 0 ? new Outer$LDirection$(new Left$()) : ord_x_r >= 20 ? new Outer$LDirection$(new Right$()) : ord_y_d >= 30 ? new Outer$LDirection$(new Down$()) : ord_y_t < 0 ? new Outer$LDirection$(new Up$()) : new Inner$());
 };
 
 var Stage$checkInner$NN = Stage.checkInner$NN;
@@ -791,24 +759,18 @@ Stage.isGround$NN = function (x, y) {
 	var ord_y_d;
 	/** @type {!number} */
 	var ord_y_t;
-	ord_x_l = Math.floor(x / Config.objWidth);
-	ord_x_r = Math.floor(x / Config.objWidth) + 1;
-	ord_y_d = Math.floor(y / Config.objHeight);
-	ord_y_t = Math.floor(y / Config.objHeight) - 1;
-	if (ord_x_l < 0 || ord_x_r >= 20 || ord_y_d >= 30 || ord_y_t < 0) {
-		return false;
-	}
-	if (Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_l) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_r) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_l) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_r) === ' ') {
-		return false;
-	} else {
-		return true;
-	}
+	ord_x_l = Math.floor(x / 8);
+	ord_x_r = Math.floor(x / 8) + 1;
+	ord_y_d = Math.floor(y / 8);
+	ord_y_t = Math.floor(y / 8) - 1;
+	return (ord_x_l < 0 || ord_x_r >= 20 || ord_y_d >= 30 || ord_y_t < 0 ? false : Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_l) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d].charAt(ord_x_r) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_l) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t].charAt(ord_x_r) === ' ' ? false : true);
 };
 
 var Stage$isGround$NN = Stage.isGround$NN;
 
 /**
- * class Obj * @constructor
+ * class Obj
+ * @constructor
  */
 function Obj() {
 }
@@ -829,7 +791,7 @@ Obj$.prototype = new Obj;
  */
 Obj.prototype.hit$LObj$ = function (other) {
 	var $math_abs_t;
-	return (($math_abs_t = this.x - other.x) >= 0 ? $math_abs_t : -$math_abs_t) < Config.objWidth && (($math_abs_t = this.y - other.y) >= 0 ? $math_abs_t : -$math_abs_t) < Config.objHeight;
+	return (($math_abs_t = this.x - other.x) >= 0 ? $math_abs_t : -$math_abs_t) < 8 && (($math_abs_t = this.y - other.y) >= 0 ? $math_abs_t : -$math_abs_t) < 8;
 };
 
 /**
@@ -838,18 +800,32 @@ Obj.prototype.hit$LObj$ = function (other) {
  * @return {!boolean}
  */
 Obj.prototype.hitGround$NN = function (dx, dy) {
-	return Stage$isGround$NN(this.x + dx, this.y + dy);
+	/** @type {!number} */
+	var x$0;
+	/** @type {!number} */
+	var y$0;
+	/** @type {!number} */
+	var ord_x_l$0;
+	/** @type {!number} */
+	var ord_x_r$0;
+	/** @type {!number} */
+	var ord_y_d$0;
+	/** @type {!number} */
+	var ord_y_t$0;
+	x$0 = this.x + dx;
+	y$0 = this.y + dy;
+	ord_x_l$0 = Math.floor(x$0 / 8);
+	ord_x_r$0 = Math.floor(x$0 / 8) + 1;
+	ord_y_d$0 = Math.floor(y$0 / 8);
+	ord_y_t$0 = Math.floor(y$0 / 8) - 1;
+	return (ord_x_l$0 < 0 || ord_x_r$0 >= 20 || ord_y_d$0 >= 30 || ord_y_t$0 < 0 ? false : Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d$0].charAt(ord_x_l$0) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_d$0].charAt(ord_x_r$0) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t$0].charAt(ord_x_l$0) === ' ' && Stage.map[Stage.difficulty][Stage.stage_number][ord_y_t$0].charAt(ord_x_r$0) === ' ' ? false : true);
 };
 
 /**
  * @return {!boolean}
  */
 Obj.prototype.isOuter$ = function () {
-	if (Stage$checkInner$NN(this.x, this.y) instanceof Outer) {
-		return true;
-	} else {
-		return false;
-	}
+	return (Stage$checkInner$NN(this.x, this.y) instanceof Outer ? true : false);
 };
 
 /**
@@ -875,7 +851,6 @@ $__jsx_merge_interface(Item, Obj);
  * @param {!number} _y
  */
 function Item$NN(_x, _y) {
-	Obj$.call(this);
 	this.x = _x;
 	this.y = _y;
 	this.character = "%";
@@ -889,7 +864,8 @@ Item.prototype.tick$ = function () {
 };
 
 /**
- * class Enemy * @constructor
+ * class Enemy
+ * @constructor
  */
 function Enemy() {
 }
@@ -902,7 +878,6 @@ Enemy.prototype.$__jsx_implements_Enemy = true;
  * @constructor
  */
 function Enemy$() {
-	Obj$.call(this);
 };
 
 Enemy$.prototype = new Enemy;
@@ -937,7 +912,6 @@ $__jsx_merge_interface(Bullet, Enemy);
  * @param {!number} _dx
  */
 function Bullet$NNN(_x, _y, _dx) {
-	Enemy$.call(this);
 	this.x = _x;
 	this.y = _y;
 	this.character = ":";
@@ -974,8 +948,6 @@ $__jsx_merge_interface(FlyingEnemy, Enemy);
  * @param {!number} _y
  */
 function FlyingEnemy$NNF$NHN$(_x, _y, _get_delta) {
-	Obj$.call(this);
-	Enemy$.call(this);
 	this.x = _x;
 	this.y = _y;
 	this.character = "F";
@@ -992,41 +964,9 @@ FlyingEnemy.prototype.tick$ = function () {
 	/** @type {Object.<string, undefined|!number>} */
 	var delta;
 	delta = this.get_delta(this.tick_count);
-	if (! (delta.dx !== undefined)) {
-		debugger;
-		throw new Error("[obj.jsx:106] assertion failure");
-	}
-	if (! (delta.dy !== undefined)) {
-		debugger;
-		throw new Error("[obj.jsx:107] assertion failure");
-	}
-	if (! this.hitGround$NN((function (v) {
-		if (! (typeof v !== "undefined")) {
-			debugger;
-			throw new Error("[obj.jsx:109] detected misuse of 'undefined' as type 'number'");
-		}
-		return v;
-	}(delta.dx)), (function (v) {
-		if (! (typeof v !== "undefined")) {
-			debugger;
-			throw new Error("[obj.jsx:109] detected misuse of 'undefined' as type 'number'");
-		}
-		return v;
-	}(delta.dy)))) {
-		this.x += (function (v) {
-			if (! (typeof v !== "undefined")) {
-				debugger;
-				throw new Error("[obj.jsx:110] detected misuse of 'undefined' as type 'number'");
-			}
-			return v;
-		}(delta.dx));
-		this.y += (function (v) {
-			if (! (typeof v !== "undefined")) {
-				debugger;
-				throw new Error("[obj.jsx:111] detected misuse of 'undefined' as type 'number'");
-			}
-			return v;
-		}(delta.dy));
+	if (! this.hitGround$NN(delta.dx, delta.dy)) {
+		this.x += delta.dx;
+		this.y += delta.dy;
 	}
 	++ this.tick_count;
 };
@@ -1048,7 +988,6 @@ $__jsx_merge_interface(WalkingObj, Obj);
  * @param {!string} _character
  */
 function WalkingObj$NNS(_x, _y, _character) {
-	Obj$.call(this);
 	this.x = _x;
 	this.y = _y;
 	this.character = _character;
@@ -1071,7 +1010,7 @@ WalkingObj.prototype.tick$ = function () {
 		} else {
 			this.dy += 0.2;
 			this.onGround = false;
-			if (this.dy <= 0 && this.hitGround$NN(0, - 1)) {
+			if (this.dy <= 0 && this.hitGround$NN(0, -1)) {
 				this.dy = 0;
 			} else {
 				if (this.hitGround$NN(0, this.dy)) {
@@ -1101,8 +1040,12 @@ $__jsx_merge_interface(WalkingEnemy, Enemy);
  * @param {!number} _dx
  */
 function WalkingEnemy$NNN(_x, _y, _dx) {
-	WalkingObj$NNS.call(this, _x, _y, "E");
-	Enemy$.call(this);
+	this.x = _x;
+	this.y = _y;
+	this.character = "E";
+	this.dx = 0;
+	this.dy = 0;
+	this.onGround = false;
 	this.dx = _dx;
 	this.hp = 3;
 };
@@ -1135,7 +1078,14 @@ ShotEnemy.prototype = new WalkingEnemy;
  * @param {!number} _dx
  */
 function ShotEnemy$NNN(_x, _y, _dx) {
-	WalkingEnemy$NNN.call(this, _x, _y, _dx);
+	this.x = _x;
+	this.y = _y;
+	this.character = "E";
+	this.dx = 0;
+	this.dy = 0;
+	this.onGround = false;
+	this.dx = _dx;
+	this.hp = 3;
 	this.character = "S";
 	this.shot_delay = 0;
 };
@@ -1148,10 +1098,10 @@ ShotEnemy$NNN.prototype = new ShotEnemy;
  */
 ShotEnemy.prototype.shot$N = function (dx) {
 	if (this.shot_delay) {
-		return null;
+		return undefined;
 	}
 	this.shot_delay = 90;
-	return new Bullet$NNN(this.x + ((dx >= 0 ? dx : - dx) / dx * Config.objWidth + dx), this.y, dx);
+	return new Bullet$NNN(this.x + ((dx >= 0 ? dx : - dx) / dx * 8 + dx), this.y, dx);
 };
 
 /**
@@ -1178,7 +1128,14 @@ MirrorEnemy.prototype = new WalkingEnemy;
  * @param {!number} _dx
  */
 function MirrorEnemy$NNN(_x, _y, _dx) {
-	WalkingEnemy$NNN.call(this, _x, _y, _dx);
+	this.x = _x;
+	this.y = _y;
+	this.character = "E";
+	this.dx = 0;
+	this.dy = 0;
+	this.onGround = false;
+	this.dx = _dx;
+	this.hp = 3;
 	this.character = "M";
 };
 
@@ -1189,7 +1146,7 @@ MirrorEnemy$NNN.prototype = new MirrorEnemy;
  * @return {Bullet}
  */
 MirrorEnemy.prototype.mirror$N = function (dx) {
-	return new Bullet$NNN(this.x - (dx >= 0 ? dx : - dx) / dx * Config.objWidth * 2 - dx, this.y, - dx);
+	return new Bullet$NNN(this.x - (dx >= 0 ? dx : - dx) / dx * 8 * 2 - dx, this.y, - dx);
 };
 
 /**
@@ -1206,7 +1163,12 @@ Pc.prototype = new WalkingObj;
  * @param {!number} _y
  */
 function Pc$NN(_x, _y) {
-	WalkingObj$NNS.call(this, _x, _y, "@");
+	this.x = _x;
+	this.y = _y;
+	this.character = "@";
+	this.dx = 0;
+	this.dy = 0;
+	this.onGround = false;
 	this.dir = 1;
 	this.shot_delay = 0;
 	this.can_shot = false;
@@ -1222,7 +1184,7 @@ Pc.prototype.move$N = function (pow) {
 	if (pow > 0) {
 		this.dir = 1;
 	} else {
-		this.dir = - 1;
+		this.dir = -1;
 	}
 	if ((($math_abs_t = this.dx + pow / 10) >= 0 ? $math_abs_t : -$math_abs_t) <= Pc.max_dx) {
 		this.dx += pow / 10;
@@ -1249,10 +1211,10 @@ Pc.prototype.enableShot$ = function () {
  */
 Pc.prototype.shot$ = function () {
 	if (! this.can_shot || this.shot_delay) {
-		return null;
+		return undefined;
 	}
 	this.shot_delay = 30;
-	return new Bullet$NNN(this.x + this.dir * (Config.objWidth + Pc.shot_dx), this.y, this.dir * Pc.shot_dx);
+	return new Bullet$NNN(this.x + this.dir * (8 + Pc.shot_dx), this.y, this.dir * Pc.shot_dx);
 };
 
 /**
@@ -1395,4 +1357,4 @@ var $__jsx_classMap = {
 };
 
 
-}());
+})();
